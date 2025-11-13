@@ -78,7 +78,7 @@ class ZoteroSettingTab extends SettingTab {
       s.addDescription(t.settings.dbPath.desc);
       s.addText((text) => {
         text.value = plugin.settings.get("dbPath");
-        text.placeholder = "/home/adam/Zotero/better-bibtex.sqlite";
+        text.placeholder = "/home/user/Zotero/better-bibtex.sqlite";
         text.onblur = () => plugin.settings.set("dbPath", text.value);
       });
     });
@@ -88,7 +88,7 @@ class ZoteroSettingTab extends SettingTab {
       s.addDescription(t.settings.zoteroDbPath.desc);
       s.addText((text) => {
         text.value = plugin.settings.get("zoteroDbPath");
-        text.placeholder = "/home/adam/Zotero/zotero.sqlite";
+        text.placeholder = "/home/user/Zotero/zotero.sqlite";
         text.onblur = () => plugin.settings.set("zoteroDbPath", text.value);
       });
     });
@@ -362,8 +362,8 @@ class SuggestionManager extends Component {
 
 // Default settings
 const DEFAULT_SETTINGS = {
-  dbPath: "/home/adam/Zotero/better-bibtex.sqlite",
-  zoteroDbPath: "/home/adam/Zotero/zotero.sqlite",
+  dbPath: "/home/user/Zotero/better-bibtex.sqlite",
+  zoteroDbPath: "/home/user/Zotero/zotero.sqlite",
 };
 
 // Main Plugin
