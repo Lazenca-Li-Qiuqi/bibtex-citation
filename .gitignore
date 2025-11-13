@@ -1,2 +1,12 @@
-./node_modules/
-./mise.toml
+# Node
+node_modules/
+npm-debug.log
+.DS_Store
+
+
+# Build artifacts
+dist/
+out/
+
+# mise
+mise.toml
