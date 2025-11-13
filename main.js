@@ -12,7 +12,7 @@ function requireLocal(moduleName) {
     "Typora",
     "plugins",
     "plugins",
-    "zotero-citation",
+    "typora-plugin-zotero",
   );
   const modulePath = path.join(pluginDir, "node_modules", moduleName);
 
