@@ -99,6 +99,7 @@ The plugin should be installed and show up in the list of installed plugins
 > If a reference already exists in the `.bib` file it will not add a duplicate
 
 
+![](./assets/showcase.gif)
 
 
 ---
