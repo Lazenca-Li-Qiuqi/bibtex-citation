@@ -5,24 +5,24 @@
 - 项目名称：`bibtex-citation`
 - 当前工作区目录名与 Git 远程仓库名均已迁移为 `bibtex-citation`
 - 项目类型：Typora Community Plugin 插件
+- 当前发布目标版本：`0.1.0`
 - 主要功能：在 Typora 中输入 `@` 时，从配置的多个 BibTeX 文件中检索文献条目并插入引用键
 - 运行依赖：
   - Typora Community Plugin Framework
   - 一个或多个本地 `.bib` 文件
   - Node.js `>=22`
 - 插件元数据入口：
-  - [`manifest.json`](D:\Desktop\bibtex-citation\manifest.json)
-  - [`main.js`](D:\Desktop\bibtex-citation\main.js)
+  - [`manifest.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\manifest.json)
+  - [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js)
 
 ## 目录结构
 
-- [`main.js`](D:\Desktop\bibtex-citation\main.js)：插件主入口，包含设置页、BibTeX 解析、引用建议与插件注册
-- [`style.css`](D:\Desktop\bibtex-citation\style.css)：建议列表样式与深色主题样式
-- [`manifest.json`](D:\Desktop\bibtex-citation\manifest.json)：Typora 插件清单，声明插件 ID、版本和平台
-- [`package.json`](D:\Desktop\bibtex-citation\package.json)：Node 依赖声明与运行时要求
-- [`package-lock.json`](D:\Desktop\bibtex-citation\package-lock.json)：锁定依赖版本
-- [`README.md`](D:\Desktop\bibtex-citation\README.md)：安装、配置与基础使用说明
-- [`assets/`](D:\Desktop\bibtex-citation\assets)：README 截图与演示 GIF
+- [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js)：插件主入口，包含设置页、BibTeX 解析、引用建议与插件注册
+- [`style.css`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\style.css)：建议列表样式与深色主题样式
+- [`manifest.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\manifest.json)：Typora 插件清单，声明插件 ID、版本和平台
+- [`package.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\package.json)：Node 依赖声明与运行时要求
+- [`package-lock.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\package-lock.json)：锁定依赖版本
+- [`README.md`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\README.md)：安装、配置与基础使用说明
 
 ## 技术栈与技术路线
 
@@ -43,11 +43,13 @@
 
 ## 当前状态
 
-- 当前仓库非常精简，核心逻辑集中在 [`main.js`](D:\Desktop\bibtex-citation\main.js)，尚未拆分模块
+- 当前仓库非常精简，核心逻辑集中在 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js)，尚未拆分模块
 - 根目录目前没有 `src/`、测试目录、构建产物目录或自动化检查脚本
 - `package.json` 当前仅保留一个占位性质的 `npm run build`，插件不再依赖原生模块构建
-- 最近提交主要集中在 README 与演示资源更新，尚未看到测试或发布流程相关文件
-- 当前 Git 工作区存在本地修改，主要是本轮对 BibTeX-only 功能裁剪的改动
+- 最近提交主要集中在设置兼容性修复、本地接手记录与文档同步，尚未看到测试或发布流程相关文件
+- 当前 Git 工作区在本轮会话结束前包含首次发布准备相关修改
+- 当前正在准备首次版本发布，目标版本为 `0.1.0`，仓库仍无历史 tag
+- `CHANGELOG.md` 已从本轮开始建立，但发布 commit 与版本 tag 仍需手动执行
 
 ### 已知实现特征
 
@@ -55,6 +57,10 @@
 - BibTeX 文件列表通过单个文本设置项维护，支持逗号、分号和换行混合分隔
 - 若多个 BibTeX 文件存在相同 citation key，以配置列表中更靠前的文件为准
 - 当前解析器是轻量实现，主要面向常见 BibTeX 条目与字段
+- 设置页当前已改为逐条添加、编辑、删除 BibTeX 路径，底层仍序列化为换行分隔字符串
+- `README.md` 已同步当前设置页交互与路径基准模式说明
+- 插件作者元数据当前统一为 `Lazenca-Liqiuqi`，不再使用早期遗留的 `adam`
+- 项目记忆中的文件路径应统一指向当前 Typora 插件目录，不再引用旧的 `D:\Desktop\bibtex-citation`
 
 ## 计划
 
@@ -64,10 +70,12 @@
 - 如果继续开发，优先验证设置页对多个路径输入的可用性与易用性
 - 补充最小可执行的调试流程说明，尤其是 BibTeX 文件路径配置与检索结果验证
 - 品牌迁移已完成，后续重点转为改进路径解析与检索体验
+- 继续补充最小可执行的发布与回归验证说明，尤其是首次发布后的手工检查步骤
+- 决定是否清理 `style.css` 中遗留的 `zotero-cite-*` 类名，避免历史命名继续扩散
 
 ### 建议后续改进
 
-- 将 [`main.js`](D:\Desktop\bibtex-citation\main.js) 拆分为设置、BibTeX 解析、建议渲染等模块
+- 将 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 拆分为设置、BibTeX 解析、建议渲染等模块
 - 为 BibTeX 解析与检索排序提取更细的纯函数，降低对 Typora 运行时的耦合，便于测试
 - 增加至少一层手工验证清单或自动化测试脚本，覆盖：
   - 多个 `.bib` 文件加载成功
@@ -79,16 +87,17 @@
 
 ### 常用文件
 
-- 插件入口：[main.js](D:\Desktop\bibtex-citation\main.js)
-- 插件清单：[manifest.json](D:\Desktop\bibtex-citation\manifest.json)
-- 依赖配置：[package.json](D:\Desktop\bibtex-citation\package.json)
-- 使用说明：[README.md](D:\Desktop\bibtex-citation\README.md)
+- 插件入口：[main.js](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js)
+- 插件清单：[manifest.json](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\manifest.json)
+- 依赖配置：[package.json](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\package.json)
+- 使用说明：[README.md](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\README.md)
 
 ### 常用命令
 
 - 安装依赖：`npm install`
 - 运行项目定义的构建流程：`npm run build`
 - 查看当前 Git 状态：`git status --short --branch`
+- 检查作者、路径与仓库信息残留：`rg -n -S "adam|D:\\Desktop\\bibtex-citation|zotero|Zotero" .`
 
 ### 调试与排查提示
 

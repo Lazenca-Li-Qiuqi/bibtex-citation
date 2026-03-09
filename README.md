@@ -4,13 +4,15 @@
 
 插件只会读取你在设置中配置的 `.bib` 文件，并在选中候选项后插入 `@citationKey`。它不会修改任何 `.bib` 文件，也不依赖外部参考文献管理器、SQLite、原生 Node 模块或第三方 npm 包。
 
+当前文档对应发布版本：`0.1.0`。
+
 ## 功能概览
 
 - 从一个或多个本地 `.bib` 文件检索文献
 - 支持按 `citation key`、标题、作者、期刊、年份等字段搜索
 - 在 Typora 中输入 `@` 触发候选列表
-- 多个 BibTeX 路径支持逗号、分号和换行混合分隔
-- 相对路径优先相对当前 Markdown 文件所在目录解析
+- 多个 BibTeX 路径支持逐条添加、编辑、删除
+- 相对路径支持多种解析基准模式
 - 当多个 BibTeX 文件存在相同 `citation key` 时，以配置列表中更靠前的文件为准
 
 ## 环境要求
@@ -56,22 +58,29 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 
 ## 配置 BibTeX 文件路径
 
-启用插件后，打开插件设置，在 `BibTeX Files` 字段中填写一个或多个 `.bib` 文件路径。
+启用插件后，打开插件设置，可以在 `BibTeX Files` 区域逐条维护 `.bib` 文件路径。
 
-支持以下分隔方式：
+推荐流程：
 
-- 每行一个路径
-- 使用逗号分隔多个路径
-- 使用分号分隔多个路径
-- 混合使用以上方式
+1. 在 `Path Base` 中选择路径解析方式
+2. 在输入框中填写一个 `.bib` 文件路径
+3. 点击 `Add BibTeX File` 添加到列表
+4. 如需修改已有路径，直接编辑对应输入框
+5. 如需删除某项，点击该行右侧的 `Remove`
 
-示例：
+可填写的路径示例：
 
 ```text
 ./references.bib
-./bib/library.bib
+../bib/library.bib
 D:/Literature/shared.bib
 ```
+
+当前支持 3 种路径基准模式：
+
+- `Relative to the current Markdown file`
+- `Relative to the folder currently opened in Typora`
+- `Absolute paths only`
 
 ## 使用教学
 
@@ -118,7 +127,11 @@ D:/Literature/shared.bib
 
 ## 相对路径解析规则
 
-如果你在设置中填写的是相对路径，插件会优先以“当前正在编辑的 Markdown 文件所在目录”为基准进行解析。
+如果你在设置中填写的是相对路径，插件会按照 `Path Base` 的配置决定解析基准。
+
+- 选择 `Relative to the current Markdown file` 时，会优先以当前正在编辑的 Markdown 文件所在目录为基准
+- 选择 `Relative to the folder currently opened in Typora` 时，会以 Typora 当前打开的目录为基准
+- 选择 `Absolute paths only` 时，只接受绝对路径；相对路径不会被加载
 
 例如，当前文档路径为：
 
@@ -138,7 +151,7 @@ D:/Projects/paper/notes/chapter1.md
 D:/Projects/paper/references/library.bib
 ```
 
-如果当前 Markdown 文件路径无法确定，插件会回退到 Typora 进程当前工作目录继续解析。
+如果当前 Markdown 文件路径无法确定，而你选择的是第一种模式，插件会回退到 Typora 当前打开的目录或进程工作目录继续解析。
 
 ## 重复 citation key 的优先级
 
@@ -179,5 +192,6 @@ secondary.bib
 
 - 插件 ID：`bibtex-citation`
 - 插件名称：`BibTeX Citations`
+- 当前版本：`0.1.0`
 - 支持平台：Windows、Linux、macOS
 - 本仓库和本地插件目录都应使用名称 `bibtex-citation`
