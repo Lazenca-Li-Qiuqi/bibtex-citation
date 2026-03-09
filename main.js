@@ -1,4 +1,4 @@
-const { Plugin, SettingTab, Component, EditorSuggest, I18n, Notice } =
+const { Plugin, SettingTab, EditorSuggest, I18n, Notice } =
   window[Symbol.for("typora-plugin-core@v2")];
 const fs = window.reqnode("fs");
 const path = window.reqnode("path");
@@ -367,19 +367,6 @@ class BibCitationSuggest extends EditorSuggest {
   }
 }
 
-class SuggestionManager extends Component {
-  constructor(app, plugin) {
-    super();
-    this.app = app;
-    this.plugin = plugin;
-  }
-
-  onload() {
-    const suggest = new BibCitationSuggest(this.app, this.plugin);
-    this.register(this.app.workspace.activeEditor.suggestion.register(suggest));
-  }
-}
-
 const DEFAULT_SETTINGS = {
   bibFiles: "",
   pathBase: PATH_BASE_MODE.MARKDOWN,
@@ -459,7 +446,23 @@ class BibCitationPlugin extends Plugin {
     );
 
     this.registerSettingTab(new BibCitationSettingTab(this));
-    this.addChild(new SuggestionManager(this.app, this));
+
+    const suggest = new BibCitationSuggest(this.app, this);
+    if (typeof this.registerMarkdownSugguest === "function") {
+      this.registerMarkdownSugguest(suggest);
+      return;
+    }
+
+    const unregister = this.app?.workspace?.activeEditor?.suggestion?.register?.(
+      suggest,
+    );
+    if (typeof unregister === "function") {
+      this.register(unregister);
+    } else {
+      console.warn(
+        "[BibTeX Citations] Failed to register markdown suggest via plugin core.",
+      );
+    }
   }
 }
 
