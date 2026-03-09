@@ -1,53 +1,47 @@
-# Typora Zotero Citation Plugin
+# Typora BibTeX Citation Plugin
 
-A Typora plugin that integrates with Zotero via SQLite for citation management.
+A Typora plugin that searches citations from one or more configured BibTeX files.
 Requires the [Typora Community Plugin Framework](https://github.com/typora-community-plugin/typora-community-plugin).
 
 ## Installation
 
-### Required:
+### Required
 
 1. Typora community plugin [https://github.com/typora-community-plugin/typora-community-plugin](https://github.com/typora-community-plugin/typora-community-plugin)
-2. Zotero [https://www.zotero.org/](https://www.zotero.org/)
-3. Better bibtex for Zotero plugin [https://retorque.re/zotero-better-bibtex/](https://retorque.re/zotero-better-bibtex/)
+2. One or more local `.bib` files
 
-### 1. Clone or download this repo into your Typora plugin folder:
+### 1. Clone or download this repo into your Typora plugin folder
 
 #### Windows
 
 ```ps1
 cd %UserProfile%\.typora\community-plugins\
-git clone https://github.com/adam-coates/typora-plugin-zotero
+git clone https://github.com/Lazenca-Liqiuqi/typora-plugin-zotero bibtex-citation
 ```
-
 
 #### MacOS & Linux
 
 ```bash
 cd ~/.config/Typora/plugins/plugins/
-git clone https://github.com/adam-coates/typora-plugin-zotero
+git clone https://github.com/Lazenca-Liqiuqi/typora-plugin-zotero bibtex-citation
 ```
 
+### 2. Install
 
-### 2. Install 
-
-The plugin depends upon the node module: `better-sqlite3`. This module is needed to be able to read Zotero `sqlite` database files. 
-Currently, this plugin **is not** part of the typora-community-plugin repository. This means that you need to install the dependencies: 
-
+This trimmed plugin no longer depends on external reference managers, SQLite, or native Node modules.
+At the moment there is no extra build step.
 
 #### Windows
 
 ```ps1
-cd %UserProfile%\.typora\community-plugins\typora-plugin-zotero
+cd %UserProfile%\.typora\community-plugins\bibtex-citation
 npm install
 ```
-
-
 
 #### MacOS & Linux
 
 ```bash
-cd ~/.config/Typora/plugins/plugins/typora-plugin-zotero
+cd ~/.config/Typora/plugins/plugins/bibtex-citation
 npm install
 ```
 
@@ -55,63 +49,53 @@ npm install
 
 ### Enable the plugin
 
-The plugin should be installed and show up in the list of installed plugins
-
+The plugin should be installed and show up in the list of installed plugins.
 
 1. Press <kbd>ctrl</kbd> + <kbd>.</kbd> to open the Global Settings
 
 ![](./assets/screenshot-2025-11-13_18-25-14.png)
 
-
 2. Enable plugin
 
 ![](./assets/screenshot-2025-11-13_18-27-39.png)
 
-
-
-
 ## Configuration
 
-- You have to specify the path to zotero.sqlite and better-bibtex.sqlite
+- Configure one or more absolute BibTeX file paths in the plugin settings
+- Separate multiple paths with commas, semicolons, or line breaks
 
 ![](./assets/screenshot-2025-11-13_18-29-26.png)
 
-
 1. Open the plugin settings
-2. Specify the path for Better BibTeX database
-3. Specify the path for Zotero database
+2. Fill in the `BibTeX Files` field
+3. Save the setting by leaving the input box
 
+Example:
+
+```text
+/Users/name/references/main.bib; /Users/name/references/group.bib
+```
 
 ---
 
 ## Usage
 
-- In Typora, typing the <kbd>@</kbd> symbol and typing out a reference should show suggestions.
-
-
-- Use up and down arrow keys to select a reference and press enter to insert it
-
-
-- If you have a `.bib` file in your current directory the plugin will add the reference to the file. 
-
-> [!NOTE]
-> The plugin will check the `.bib` file for the corresponding reference first. 
-> If a reference already exists in the `.bib` file it will not add a duplicate
-
+- In Typora, type the <kbd>@</kbd> symbol followed by part of a citation key, title, author, journal, or year
+- Use the up and down arrow keys to select a reference and press enter to insert `@citationKey`
+- The plugin only searches the configured BibTeX files and does not modify any `.bib` file
 
 ![](./assets/showcase.gif)
 
-
 ---
 
-## Zotero
+## Notes
 
-This plugin depends upon [zotero](https://www.zotero.org/) and the [better-bibtex zotero plugin](https://retorque.re/zotero-better-bibtex/). 
+- If the same citation key exists in multiple configured BibTeX files, the first file in the configured list wins
+- Missing or unreadable BibTeX files are skipped with a console warning
+- The current parser is designed for common BibTeX entries and fields such as `title`, `author`, `year`, `journal`, `journaltitle`, `booktitle`, and `publisher`
 
-Once Zotero and better bibtex for zotero is setup then you should expect to find 2 sqlite databases for zotero and for better-bibtex
+## Migration
 
-```bash
-~/Zotero/zotero.sqlite
-~/Zotero/better-bibtex.sqlite
-```
-
+- The current remote repository name still uses `typora-plugin-zotero`, but the plugin itself is now BibTeX-only
+- For new installs, clone into a local plugin folder named `bibtex-citation`
+- For existing installs, renaming the local plugin directory from `typora-plugin-zotero` to `bibtex-citation` helps keep the plugin identity consistent with the new manifest and package names

@@ -1,7 +1,7 @@
 {
-  "id": "zotero-citation",
-  "name": "Zotero Citations",
-  "description": "Insert Zotero citations using Better BibTeX keys with @ command",
+  "id": "bibtex-citation",
+  "name": "BibTeX Citations",
+  "description": "Insert citations from configured BibTeX files using the @ command",
   "author": "adam",
   "version": "1.0.0",
   "minAppVersion": "1.5.0",

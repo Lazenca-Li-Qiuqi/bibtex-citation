@@ -1,68 +1,105 @@
 const { Plugin, SettingTab, Component, EditorSuggest, I18n, Notice } =
   window[Symbol.for("typora-plugin-core@v2")];
 const fs = window.reqnode("fs");
-const os = window.reqnode("os");
-const path = window.reqnode("path");
 
-// Helper to require from plugin's local node_modules
-function requireLocal(moduleName) {
-  const pluginDir = path.join(
-    process.env.HOME || process.env.USERPROFILE,
-    ".config",
-    "Typora",
-    "plugins",
-    "plugins",
-    "typora-plugin-zotero",
-  );
-  const modulePath = path.join(pluginDir, "node_modules", moduleName);
+const MAX_SUGGESTIONS = 50;
 
-  try {
-    return require(modulePath);
-  } catch (e) {
-    try {
-      return window.reqnode(modulePath);
-    } catch (e2) {
-      const Module = window.reqnode("module");
-      const m = new Module(modulePath);
-      m.filename = modulePath;
-      m.paths = Module._nodeModulePaths(pluginDir);
-      m.load(modulePath);
-      return m.exports;
-    }
-  }
+// 解析用户配置的 BibTeX 文件列表，支持换行、逗号和分号分隔
+function parseBibFileList(value) {
+  return String(value || "")
+    .split(/[\r\n,;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
-// i18n
+function normalizeWhitespace(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function parseBibValue(rawValue) {
+  if (!rawValue) return "";
+
+  const value = normalizeWhitespace(rawValue);
+  if (
+    (value.startsWith("{") && value.endsWith("}")) ||
+    (value.startsWith('"') && value.endsWith('"'))
+  ) {
+    return normalizeWhitespace(value.slice(1, -1));
+  }
+
+  return value;
+}
+
+// 这里使用轻量级 BibTeX 解析，只提取检索与展示所需的常见字段
+function parseBibEntries(content, sourcePath) {
+  const entries = [];
+  const entryRegex = /@(\w+)\s*\{\s*([^,\s]+)\s*,([\s\S]*?)\n?\}\s*(?=@|$)/g;
+  let match;
+
+  while ((match = entryRegex.exec(content)) !== null) {
+    const [, type, key, body] = match;
+    const fields = {};
+    const fieldRegex = /(\w+)\s*=\s*({(?:[^{}]|{[^{}]*})*}|"[^"]*"|[^,\n]+)\s*,?/g;
+    let fieldMatch;
+
+    while ((fieldMatch = fieldRegex.exec(body)) !== null) {
+      fields[fieldMatch[1].toLowerCase()] = parseBibValue(fieldMatch[2]);
+    }
+
+    entries.push({
+      key: key.trim(),
+      type: type.toLowerCase(),
+      title: fields.title || "",
+      authors: fields.author || "",
+      year: fields.year || fields.date || "",
+      journal: fields.journal || fields.journaltitle || fields.booktitle || "",
+      publisher: fields.publisher || "",
+      sourcePath,
+      searchText: normalizeWhitespace(
+        [
+          key,
+          fields.title,
+          fields.author,
+          fields.year,
+          fields.date,
+          fields.journal,
+          fields.journaltitle,
+          fields.booktitle,
+          fields.publisher,
+        ].join(" "),
+      ).toLowerCase(),
+    });
+  }
+
+  return entries;
+}
+
 const i18n = new I18n({
   resources: {
     en: {
-      commandInsert: "Insert Zotero Citation",
-      dbNotFound: "Database not found",
-      bibNotFound:
-        "No .bib file found in current document folder. Citation not appended.",
-      exporting: "Exporting from database...",
-      exportError: "Export failed: ",
-      fileError: "Error reading citations file: ",
+      commandInsert: "Insert BibTeX Citation",
+      fileNotFound: "BibTeX file not found: ",
+      noFilesConfigured: "Please configure at least one BibTeX file path.",
+      loadError: "Failed to load BibTeX files: ",
+      settingsSaved: "BibTeX file list updated.",
       settings: {
-        dbPath: {
-          name: "Better BibTeX DB Path",
-          desc: "Path to better-bibtex.sqlite",
+        bibFiles: {
+          name: "BibTeX Files",
+          desc: "Absolute BibTeX file paths separated by commas, semicolons, or new lines",
         },
-        zoteroDbPath: { name: "Zotero DB Path", desc: "Path to zotero.sqlite" },
       },
     },
   },
 });
 
-// Settings Tab
-class ZoteroSettingTab extends SettingTab {
+class BibCitationSettingTab extends SettingTab {
   constructor(plugin) {
     super();
     this.plugin = plugin;
   }
 
   get name() {
-    return "Zotero Citations";
+    return "BibTeX Citations";
   }
 
   onload() {
@@ -74,51 +111,28 @@ class ZoteroSettingTab extends SettingTab {
     const plugin = this.plugin;
 
     this.addSetting((s) => {
-      s.addName(t.settings.dbPath.name);
-      s.addDescription(t.settings.dbPath.desc);
+      s.addName(t.settings.bibFiles.name);
+      s.addDescription(t.settings.bibFiles.desc);
       s.addText((text) => {
-        text.value = plugin.settings.get("dbPath");
-        text.placeholder = "/home/user/Zotero/better-bibtex.sqlite";
-        text.onblur = () => plugin.settings.set("dbPath", text.value);
-      });
-    });
-
-    this.addSetting((s) => {
-      s.addName(t.settings.zoteroDbPath.name);
-      s.addDescription(t.settings.zoteroDbPath.desc);
-      s.addText((text) => {
-        text.value = plugin.settings.get("zoteroDbPath");
-        text.placeholder = "/home/user/Zotero/zotero.sqlite";
-        text.onblur = () => plugin.settings.set("zoteroDbPath", text.value);
+        text.value = plugin.settings.get("bibFiles");
+        text.placeholder =
+          "/path/to/references.bib; /path/to/library.bib; /path/to/group.bib";
+        text.onblur = () => {
+          plugin.settings.set("bibFiles", text.value);
+          plugin.resetCache();
+          new Notice(t.settingsSaved);
+        };
       });
     });
   }
 }
 
-// Citation Suggest
-class ZoteroCitationSuggest extends EditorSuggest {
+class BibCitationSuggest extends EditorSuggest {
   constructor(app, plugin) {
     super();
     this.app = app;
     this.plugin = plugin;
     this.triggerText = "@";
-    this.bbtDb = null;
-    this.zoteroDb = null;
-  }
-
-  ensureDbs() {
-    if (!this.bbtDb) {
-      const Database = requireLocal("better-sqlite3");
-      this.bbtDb = new Database(this.plugin.settings.get("dbPath"), {
-        readonly: true,
-      });
-    }
-    if (!this.zoteroDb) {
-      const Database = requireLocal("better-sqlite3");
-      this.zoteroDb = new Database(this.plugin.settings.get("zoteroDbPath"), {
-        readonly: true,
-      });
-    }
   }
 
   findQuery(text) {
@@ -128,85 +142,19 @@ class ZoteroCitationSuggest extends EditorSuggest {
 
   getSuggestions(query) {
     if (!query) return [];
-    this.ensureDbs();
 
-    const stmt = this.bbtDb.prepare(`
-      SELECT citationKey, itemKey
-      FROM citationkey
-      WHERE citationKey LIKE ?
-      LIMIT 50
-    `);
-    const rows = stmt.all(`%${query}%`);
+    const normalizedQuery = query.toLowerCase();
+    const entries = this.plugin.getBibEntries();
 
-    return rows.map((r) => {
-      let title = "",
-        authors = "",
-        year = "",
-        type = "misc",
-        doi = "",
-        url = "",
-        journal = "",
-        publisher = "";
-      try {
-        // Get metadata from zotero.sqlite
-        const metaStmt = this.zoteroDb.prepare(`
-          SELECT items.key AS itemKey,
-                 itemTypes.typeName AS typeName,
-                 parentItemDataValues.value AS fieldValue,
-                 fields.fieldName AS fieldName
-          FROM items
-            INNER JOIN itemTypes ON items.itemTypeID = itemTypes.itemTypeID
-            INNER JOIN itemData AS parentItemData ON parentItemData.itemID = items.itemID
-            INNER JOIN itemDataValues AS parentItemDataValues ON parentItemData.valueID = parentItemDataValues.valueID
-            INNER JOIN fields ON parentItemData.fieldID = fields.fieldID
-          WHERE items.key = ?
-        `);
-        const metaRows = metaStmt.all(r.itemKey);
-
-        type = "misc";
-        for (const row of metaRows) {
-          switch (row.fieldName.toLowerCase()) {
-            case "title":
-              title = row.fieldValue;
-              break;
-            case "date":
-              year = row.fieldValue.split("-")[0];
-              break;
-            case "author":
-              authors = row.fieldValue;
-              break;
-            case "doi":
-              doi = row.fieldValue;
-              break;
-            case "url":
-              url = row.fieldValue;
-              break;
-            case "journal":
-              journal = row.fieldValue;
-              break;
-            case "publisher":
-              publisher = row.fieldValue;
-              break;
-          }
-          type = row.typeName.toLowerCase() || "misc";
-        }
-      } catch (e) {
-        console.warn("Zotero metadata error:", e.message);
-      }
-
-      return {
-        key: r.citationKey,
-        title,
-        authors,
-        year,
-        type,
-        doi,
-        url,
-        journal,
-        publisher,
-        itemKey: r.itemKey, // add itemKey so we can use it later
-      };
-    });
+    return entries
+      .filter((item) => item.searchText.includes(normalizedQuery))
+      .sort((a, b) => {
+        const aStarts = a.key.toLowerCase().startsWith(normalizedQuery) ? 0 : 1;
+        const bStarts = b.key.toLowerCase().startsWith(normalizedQuery) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return a.key.localeCompare(b.key);
+      })
+      .slice(0, MAX_SUGGESTIONS);
   }
 
   getSuggestionId(item) {
@@ -215,162 +163,82 @@ class ZoteroCitationSuggest extends EditorSuggest {
 
   renderSuggestion(item) {
     let label = `@${item.key}`;
-    const meta = [item.title, item.authors, item.year]
-      .filter(Boolean)
-      .join(" ");
+    const meta = [item.title, item.authors, item.year].filter(Boolean).join(" ");
     if (meta) label += ` — ${meta}`;
     return label.trim();
   }
+
   beforeApply(item) {
-    this.appendToBib(item);
     return `@${item.key}`;
   }
-
-  getCurrentFilePath() {
-    // Look for the active file node in Typora's file tree
-    const activeNode = document.querySelector(
-      ".file-library-node.file-library-file-node.active"
-    );
-
-    if (activeNode) {
-      const path = activeNode.getAttribute("data-path");
-      if (path && path.endsWith(".md")) {
-        console.log("Detected current markdown file path:", path);
-        return path;
-      }
-    }
-
-    // Fallback: try to detect from window title (sometimes contains filename)
-    const titleMatch = document.title.match(/(.+\.md)/);
-    if (titleMatch) {
-      console.log("Detected markdown path from title:", titleMatch[1]);
-      return titleMatch[1];
-    }
-
-    alert("Could not detect the current file path. Try saving and reopening Typora.");
-    return null;
-  }
-
-  /** NEW — get all fields for itemKey from zotero.sqlite */
- getFullItemData(itemKey) {
-  if (!this.zoteroDb) return {};
-
-  const data = {};
-
-  try {
-    // 1. Fetch standard itemData fields
-    const stmtFields = this.zoteroDb.prepare(`
-      SELECT f.fieldName, v.value
-      FROM itemData d
-      JOIN fields f ON d.fieldID = f.fieldID
-      JOIN itemDataValues v ON d.valueID = v.valueID
-      JOIN items i ON d.itemID = i.itemID
-      WHERE i.key = ?
-    `);
-    const rows = stmtFields.all(itemKey);
-    for (const row of rows) data[row.fieldName] = row.value;
-
-    // 2. Fetch creators (authors)
-    const stmtAuthors = this.zoteroDb.prepare(`
-      SELECT c.firstName, c.lastName, ct.creatorType
-      FROM itemCreators ic
-      JOIN creators c ON ic.creatorID = c.creatorID
-      JOIN creatorTypes ct ON ic.creatorTypeID = ct.creatorTypeID
-      JOIN items i ON ic.itemID = i.itemID
-      WHERE i.key = ?
-      ORDER BY ic.orderIndex
-    `);
-    const authorRows = stmtAuthors.all(itemKey);
-    if (authorRows.length) {
-      // join authors in BibTeX "First Last and ..." format
-      data.authors = authorRows
-        .map(a => {
-          const first = a.firstName || "";
-          const last = a.lastName || "";
-          return `${first} ${last}`.trim();
-        })
-        .join(" and ");
-    }
-
-  } catch (e) {
-    console.error("Error fetching full item data:", e);
-  }
-
-  return data;
 }
 
-appendToBib(item) {
-  const mdPath = this.getCurrentFilePath();
-  if (!mdPath) return;
-
-  const dir = path.dirname(mdPath);
-  const bibFile = fs.readdirSync(dir).find(f => f.endsWith(".bib"));
-  if (!bibFile) {
-    console.warn(i18n.t.bibNotFound);
-    return;
-  }
-
-  const fullBibPath = path.join(dir, bibFile);
-  const existing = fs.readFileSync(fullBibPath, "utf8");
-  if (existing.includes(`{${item.key},`)) return;
-
-  // fetch all fields + authors from Zotero
-  const fullData = this.getFullItemData(item.itemKey || item.key);
-
-  let entry = `@${item.type || "article"}{${item.key},\n`;
-
-  const add = (k, v) => { if (v) entry += `  ${k} = {${v}},\n`; };
-
-  add("author", fullData.authors || item.authors);
-  add("title", fullData.title || item.title);
-  add("journal", fullData.publicationTitle || item.journal);
-  add("volume", fullData.volume);
-  add("issue", fullData.issue);
-  add("pages", fullData.pages);
-  add("year", fullData.date ? fullData.date.split("-")[0] : item.year);
-  add("doi", fullData.DOI || item.doi);
-  add("issn", fullData.ISSN);
-  add("abstract", fullData.abstractNote);
-  add("publisher", fullData.publisher || item.publisher);
-  add("url", fullData.url || item.url);
-  add("keywords", fullData.shortTitle);
-  add("language", fullData.language);
-
-  entry += `}\n\n`;
-
-  fs.appendFileSync(fullBibPath, entry);
-  console.log(`✅ Added ${item.key} to ${bibFile}`);
-} 
-  onunload() {
-    if (this.bbtDb) this.bbtDb.close();
-    if (this.zoteroDb) this.zoteroDb.close();
-  }
-}
-
-// Suggestion Manager
 class SuggestionManager extends Component {
   constructor(app, plugin) {
     super();
     this.app = app;
     this.plugin = plugin;
   }
+
   onload() {
-    const suggest = new ZoteroCitationSuggest(this.app, this.plugin);
+    const suggest = new BibCitationSuggest(this.app, this.plugin);
     this.register(this.app.workspace.activeEditor.suggestion.register(suggest));
   }
 }
 
-// Default settings
 const DEFAULT_SETTINGS = {
-  dbPath: "/home/user/Zotero/better-bibtex.sqlite",
-  zoteroDbPath: "/home/user/Zotero/zotero.sqlite",
+  bibFiles: "",
 };
 
-// Main Plugin
-class ZoteroCitationPlugin extends Plugin {
+class BibCitationPlugin extends Plugin {
   constructor() {
     super(...arguments);
     this.i18n = i18n;
+    this.bibCache = new Map();
+  }
+
+  resetCache() {
+    this.bibCache.clear();
+  }
+
+  getBibEntries() {
+    const bibFiles = parseBibFileList(this.settings.get("bibFiles"));
+
+    if (!bibFiles.length) return [];
+
+    const merged = [];
+    const seenKeys = new Set();
+
+    for (const bibFile of bibFiles) {
+      if (!fs.existsSync(bibFile)) {
+        console.warn(this.i18n.t.fileNotFound + bibFile);
+        continue;
+      }
+
+      try {
+        const stat = fs.statSync(bibFile);
+        const cacheItem = this.bibCache.get(bibFile);
+
+        if (!cacheItem || cacheItem.mtimeMs !== stat.mtimeMs) {
+          const content = fs.readFileSync(bibFile, "utf8");
+          this.bibCache.set(bibFile, {
+            mtimeMs: stat.mtimeMs,
+            entries: parseBibEntries(content, bibFile),
+          });
+        }
+
+        const { entries } = this.bibCache.get(bibFile);
+        for (const entry of entries) {
+          if (seenKeys.has(entry.key)) continue;
+          seenKeys.add(entry.key);
+          merged.push(entry);
+        }
+      } catch (error) {
+        console.error(this.i18n.t.loadError + bibFile, error);
+      }
+    }
+
+    return merged;
   }
 
   async onload() {
@@ -383,9 +251,9 @@ class ZoteroCitationPlugin extends Plugin {
     );
     this.settings.setDefault(DEFAULT_SETTINGS);
 
-    this.registerSettingTab(new ZoteroSettingTab(this));
+    this.registerSettingTab(new BibCitationSettingTab(this));
     this.addChild(new SuggestionManager(this.app, this));
   }
 }
 
-export default ZoteroCitationPlugin;
+export default BibCitationPlugin;

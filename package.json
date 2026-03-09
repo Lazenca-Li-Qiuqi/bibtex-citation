@@ -1,19 +1,13 @@
 {
-  "name": "zotero-citation",
+  "name": "bibtex-citation",
   "version": "1.0.0",
-  "description": "Typora Zotero Citation Plugin",
+  "description": "Typora BibTeX Citation Plugin",
   "main": "main.js",
   "scripts": {
-    "postinstall": "npx electron-rebuild -v 35.6.0",
-    "build": "npm install && npx electron-rebuild -v 35.6.0"
+    "build": "echo BibTeX-only plugin does not require a build step"
   },
-  "dependencies": {
-    "better-sqlite3": "^12.4.1",
-    "sql.js": "^1.13.0"
-  },
-  "devDependencies": {
-    "electron-rebuild": "^3.2.9"
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "engines": {
     "node": ">=22"
   }
