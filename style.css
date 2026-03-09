@@ -52,3 +52,37 @@
 .theme-dark .zotero-cite-title {
   color: #777;
 }
+
+.bibtex-setting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.bibtex-setting-row,
+.bibtex-setting-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bibtex-setting-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.bibtex-setting-remove,
+.bibtex-setting-add {
+  white-space: nowrap;
+}
+
+.bibtex-setting-empty {
+  color: #666;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.theme-dark .bibtex-setting-empty {
+  color: #999;
+}

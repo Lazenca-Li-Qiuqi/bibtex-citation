@@ -4,9 +4,18 @@ const fs = window.reqnode("fs");
 const path = window.reqnode("path");
 
 const MAX_SUGGESTIONS = 50;
+const PATH_BASE_MODE = {
+  MARKDOWN: "markdown",
+  TYPORA: "typora",
+  ABSOLUTE: "absolute",
+};
 
-// 解析用户配置的 BibTeX 文件列表，支持换行、逗号和分号分隔
-function parseBibFileList(value) {
+// 兼容旧版字符串设置，并统一为数组形式
+function normalizeBibFileList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+
   return String(value || "")
     .split(/[\r\n,;]+/)
     .map((item) => item.trim())
@@ -32,17 +41,41 @@ function getActiveMarkdownPath() {
   return null;
 }
 
-function resolveBibFilePath(rawPath) {
+function getTyporaBasePath(plugin) {
+  const vaultPath = plugin?.app?.vault?.path;
+  if (vaultPath) {
+    return vaultPath;
+  }
+
+  return process.cwd();
+}
+
+function shouldRejectRelativePath(plugin, filePath) {
+  return (
+    plugin.settings.get("pathBase") === PATH_BASE_MODE.ABSOLUTE &&
+    !path.isAbsolute(String(filePath || "").trim())
+  );
+}
+
+function resolveBibFilePath(rawPath, plugin) {
   const trimmedPath = String(rawPath || "").trim();
   if (!trimmedPath) return "";
   if (path.isAbsolute(trimmedPath)) return trimmedPath;
 
-  const activeMarkdownPath = getActiveMarkdownPath();
-  if (activeMarkdownPath) {
-    return path.resolve(path.dirname(activeMarkdownPath), trimmedPath);
+  const pathBase = plugin.settings.get("pathBase");
+
+  if (pathBase === PATH_BASE_MODE.ABSOLUTE) {
+    return "";
   }
 
-  return path.resolve(process.cwd(), trimmedPath);
+  if (pathBase === PATH_BASE_MODE.MARKDOWN) {
+    const activeMarkdownPath = getActiveMarkdownPath();
+    if (activeMarkdownPath) {
+      return path.resolve(path.dirname(activeMarkdownPath), trimmedPath);
+    }
+  }
+
+  return path.resolve(getTyporaBasePath(plugin), trimmedPath);
 }
 
 function normalizeWhitespace(value) {
@@ -114,11 +147,25 @@ const i18n = new I18n({
       fileNotFound: "BibTeX file not found: ",
       noFilesConfigured: "Please configure at least one BibTeX file path.",
       loadError: "Failed to load BibTeX files: ",
-      settingsSaved: "BibTeX file list updated.",
+      settingsSaved: "Settings updated.",
+      emptyPathWarning: "Please enter a BibTeX file path first.",
+      absolutePathRequired:
+        "This path mode only accepts absolute BibTeX file paths.",
       settings: {
+        pathBase: {
+          name: "Path Base",
+          desc: "Choose how non-absolute BibTeX file paths should be resolved.",
+          markdown: "Relative to the current Markdown file",
+          typora: "Relative to the folder currently opened in Typora",
+          absolute: "Absolute paths only",
+        },
         bibFiles: {
           name: "BibTeX Files",
-          desc: "BibTeX file paths separated by commas, semicolons, or new lines. Relative paths are resolved from the current Markdown file directory.",
+          desc: "Manage BibTeX file paths one by one. The order controls duplicate citation key priority.",
+          add: "Add BibTeX File",
+          empty: "No BibTeX files configured yet.",
+          placeholder: "./references.bib",
+          remove: "Remove",
         },
       },
     },
@@ -142,21 +189,130 @@ class BibCitationSettingTab extends SettingTab {
   render() {
     const t = this.plugin.i18n.t;
     const plugin = this.plugin;
+    const container = this.containerEl || this.contentEl || this.tabContentEl;
+
+    container.empty?.();
+    if (!container.empty) {
+      container.innerHTML = "";
+    }
+
+    this.addSetting((s) => {
+      s.addName(t.settings.pathBase.name);
+      s.addDescription(t.settings.pathBase.desc);
+      s.addDropdown((dropdown) => {
+        dropdown.addOption(
+          PATH_BASE_MODE.MARKDOWN,
+          t.settings.pathBase.markdown,
+        );
+        dropdown.addOption(PATH_BASE_MODE.TYPORA, t.settings.pathBase.typora);
+        dropdown.addOption(PATH_BASE_MODE.ABSOLUTE, t.settings.pathBase.absolute);
+        dropdown.setValue(plugin.settings.get("pathBase"));
+        dropdown.onChange((value) => {
+          plugin.settings.set("pathBase", value);
+          plugin.resetCache();
+          this.render();
+          new Notice(t.settingsSaved);
+        });
+      });
+    });
 
     this.addSetting((s) => {
       s.addName(t.settings.bibFiles.name);
       s.addDescription(t.settings.bibFiles.desc);
-      s.addText((text) => {
-        text.value = plugin.settings.get("bibFiles");
-        text.placeholder =
-          "./references.bib; ./library/group.bib; /path/to/shared.bib";
-        text.onblur = () => {
-          plugin.settings.set("bibFiles", text.value);
-          plugin.resetCache();
-          new Notice(t.settingsSaved);
-        };
-      });
     });
+
+    const listHost = document.createElement("div");
+    listHost.className = "bibtex-setting-list";
+    container.appendChild(listHost);
+
+    const bibFiles = normalizeBibFileList(plugin.settings.get("bibFiles"));
+    if (!bibFiles.length) {
+      const emptyState = document.createElement("div");
+      emptyState.className = "bibtex-setting-empty";
+      emptyState.textContent = t.settings.bibFiles.empty;
+      listHost.appendChild(emptyState);
+    }
+
+    bibFiles.forEach((bibFile, index) => {
+      const row = document.createElement("div");
+      row.className = "bibtex-setting-row";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "bibtex-setting-input";
+      input.value = bibFile;
+      input.placeholder = t.settings.bibFiles.placeholder;
+      input.addEventListener("change", () => {
+        if (shouldRejectRelativePath(plugin, input.value)) {
+          new Notice(t.absolutePathRequired);
+          input.value = bibFile;
+          return;
+        }
+
+        const nextFiles = normalizeBibFileList(plugin.settings.get("bibFiles"));
+        nextFiles[index] = input.value.trim();
+        plugin.settings.set(
+          "bibFiles",
+          nextFiles.filter(Boolean),
+        );
+        plugin.resetCache();
+        this.render();
+        new Notice(t.settingsSaved);
+      });
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "bibtex-setting-remove";
+      removeButton.textContent = t.settings.bibFiles.remove;
+      removeButton.addEventListener("click", () => {
+        const nextFiles = normalizeBibFileList(plugin.settings.get("bibFiles"));
+        nextFiles.splice(index, 1);
+        plugin.settings.set("bibFiles", nextFiles);
+        plugin.resetCache();
+        this.render();
+        new Notice(t.settingsSaved);
+      });
+
+      row.appendChild(input);
+      row.appendChild(removeButton);
+      listHost.appendChild(row);
+    });
+
+    const addRow = document.createElement("div");
+    addRow.className = "bibtex-setting-add-row";
+
+    const addInput = document.createElement("input");
+    addInput.type = "text";
+    addInput.className = "bibtex-setting-input";
+    addInput.placeholder = t.settings.bibFiles.placeholder;
+
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "bibtex-setting-add";
+    addButton.textContent = t.settings.bibFiles.add;
+    addButton.addEventListener("click", () => {
+      const nextValue = addInput.value.trim();
+      if (!nextValue) {
+        new Notice(t.emptyPathWarning);
+        return;
+      }
+
+      if (shouldRejectRelativePath(plugin, nextValue)) {
+        new Notice(t.absolutePathRequired);
+        return;
+      }
+
+      const nextFiles = normalizeBibFileList(plugin.settings.get("bibFiles"));
+      nextFiles.push(nextValue);
+      plugin.settings.set("bibFiles", nextFiles);
+      plugin.resetCache();
+      this.render();
+      new Notice(t.settingsSaved);
+    });
+
+    addRow.appendChild(addInput);
+    addRow.appendChild(addButton);
+    container.appendChild(addRow);
   }
 }
 
@@ -220,7 +376,8 @@ class SuggestionManager extends Component {
 }
 
 const DEFAULT_SETTINGS = {
-  bibFiles: "",
+  bibFiles: [],
+  pathBase: PATH_BASE_MODE.MARKDOWN,
 };
 
 class BibCitationPlugin extends Plugin {
@@ -235,7 +392,7 @@ class BibCitationPlugin extends Plugin {
   }
 
   getBibEntries() {
-    const bibFiles = parseBibFileList(this.settings.get("bibFiles"));
+    const bibFiles = normalizeBibFileList(this.settings.get("bibFiles"));
 
     if (!bibFiles.length) return [];
 
@@ -243,7 +400,12 @@ class BibCitationPlugin extends Plugin {
     const seenKeys = new Set();
 
     for (const bibFile of bibFiles) {
-      const resolvedPath = resolveBibFilePath(bibFile);
+      const resolvedPath = resolveBibFilePath(bibFile, this);
+
+      if (!resolvedPath) {
+        console.warn(this.i18n.t.absolutePathRequired);
+        continue;
+      }
 
       if (!fs.existsSync(resolvedPath)) {
         console.warn(this.i18n.t.fileNotFound + resolvedPath);
@@ -285,6 +447,14 @@ class BibCitationPlugin extends Plugin {
       ),
     );
     this.settings.setDefault(DEFAULT_SETTINGS);
+    this.settings.set(
+      "bibFiles",
+      normalizeBibFileList(this.settings.get("bibFiles")),
+    );
+    this.settings.set(
+      "pathBase",
+      this.settings.get("pathBase") || PATH_BASE_MODE.MARKDOWN,
+    );
 
     this.registerSettingTab(new BibCitationSettingTab(this));
     this.addChild(new SuggestionManager(this.app, this));
