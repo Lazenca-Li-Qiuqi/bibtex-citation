@@ -11,5 +11,5 @@ out/
 # mise
 mise.toml
 
-# Local runtime/test fixtures
-fixtures/
+# Local tests
+tests/

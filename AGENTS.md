@@ -51,11 +51,12 @@
 ## 当前状态
 
 - 当前仓库已完成一轮模块化重构，入口保持 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 稳定，核心逻辑迁移到 `src/`
-- 当前模块划分已覆盖插件主控、BibTeX 数据层、建议层、设置页与通用工具，但仍没有测试目录、构建产物目录或自动化检查脚本
+- 当前模块划分已覆盖插件主控、BibTeX 数据层、建议层、设置页与通用工具；运行时已接入可配置的外部 CSL 文件与 citation 渲染，但仓库当前仍没有受版本控制的自动化测试目录
 - `package.json` 当前仅保留一个占位性质的 `npm run build`，插件不再依赖原生模块构建
 - 最近提交已包含 `v0.1.0`、`v0.1.1`、`v0.1.2`、`v0.2.0`、`v0.2.1`、`v0.2.2`、`v0.2.3`、`v0.2.4` 与 `v0.2.5`，当前 `HEAD` 将进入 `v0.2.5` 发布提交
 - `v0.2.5` 主要收敛当前文档引用统计语义：闭合块提取、非法 citation key 报错、以及输入或删除右方括号后的即时刷新
 - 当前候选栏样式、点击选择、回车插入与越界修正已基本稳定，后续重点可转向路径解析、检索体验与引用统计边界场景的手工回归
+- 当前设置页已支持单个 `CSL File` 路径，并复用 `Path Base` 的三种解析模式；citation 渲染在点击按钮时懒加载，不再阻塞插件启动
 
 ### 已知实现特征
 
@@ -90,6 +91,10 @@
 - 当侧边栏因设置变更显示“待刷新”后，下一次输入 `[@query` 触发懒加载时，会自动同步刷新“已索引条目数”
 - 当前文档引用统计当前通过文档级 `keydown` 监听 `]`、`Backspace` 与 `Delete` 触发下一帧重算；若后续改动这条链路，优先保持“补上或删掉右方括号后立即刷新统计”的体验
 - 左侧活动栏图标当前改为大号引号字形，并通过 [`style.css`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\style.css) 微调位置；侧边栏当前仅保留 `Refresh Cache` 按钮，不再重复提供打开设置入口
+- `Render Citations` 当前只处理严格合法的 `[@key]` / `[@a; @b]` 闭合块；带前缀说明、locator、未知 key 或逗号分隔的块会保持原样
+- CSL 相关模块当前必须通过懒加载进入启动链，并使用 `createRequire(import.meta.url)` 解析插件目录内的 `@citation-js/*` 依赖，否则 Typora 设置页与侧边栏可能整块消失
+- 同作者同年 citation 当前按整篇文档上下文与 bibliography 排序做稳定消歧，因此 `2024a/2024b` 的分配与显示顺序由样式排序决定，不按 citation key 名中的字母决定
+- 本地 `tests/` 目录当前仅作为临时开发测试区使用，并被 `.gitignore` 整体忽略；不要在 README、package.json 或发布说明中把其中脚本当成受支持的仓库接口
 
 ## 计划
 
@@ -139,6 +144,7 @@
 - 检查作者、路径与仓库信息残留：`rg -n -S "adam|D:\\Desktop\\bibtex-citation|zotero|Zotero" .`
 - 检查主入口语法：`node --check main.js`
 - 检查 `src/` 下所有模块语法：`Get-ChildItem -Recurse .\src -Filter *.js | ForEach-Object { node --check $_.FullName }`
+- 检查 `package.json`、`README.md` 与 `.gitignore` 是否仍与“本地测试不追踪”的策略一致：`git diff -- package.json README.md .gitignore`
 - 检查候选栏触发与点击兜底相关实现：`rg -n "findQuery|registerSuggestInteractions|getSelectedBibtexSuggestionKey|translateX" src`
 - 检查当前文档引用统计与 `]` 刷新链路：`rg -n "getCitationState|extractClosedBracketBlocks|getEntryKeySet|scheduleCitationStateRefresh|handleCitationStateKeydown" src`
 

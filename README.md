@@ -163,7 +163,7 @@ D:/Literature/shared.bib
 [@smith2024example; @doe2023study]
 ```
 
-会被渲染为当前内置 CSL 样式对应的文中引用文本，例如：
+会被渲染为当前配置的 CSL 样式对应的文中引用文本，例如：
 
 ```text
 (Smith 2024)
