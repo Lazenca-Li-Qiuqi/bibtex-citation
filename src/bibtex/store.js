@@ -14,6 +14,7 @@ export class BibEntryStore {
     this.plugin = plugin;
     this.cache = new Map();
     this.mergedEntries = null;
+    this.mergedEntryKeySet = null;
   }
 
   /**
@@ -24,6 +25,7 @@ export class BibEntryStore {
   clear() {
     this.cache.clear();
     this.mergedEntries = null;
+    this.mergedEntryKeySet = null;
   }
 
   /**
@@ -33,6 +35,21 @@ export class BibEntryStore {
    */
   hasMergedEntries() {
     return Array.isArray(this.mergedEntries);
+  }
+
+  /**
+   * 功能：获取当前合并文献库对应的合法 citation key 集合。
+   * 说明：该集合与 `mergedEntries` 共享同一份缓存生命周期，不会在每次统计时重复构建。
+   * 输入：无。
+   * 输出：包含当前所有合法 citation key 的 Set。
+   */
+  getEntryKeySet() {
+    if (this.mergedEntryKeySet) {
+      return this.mergedEntryKeySet;
+    }
+
+    this.getEntries();
+    return this.mergedEntryKeySet || new Set();
   }
 
   /**
@@ -89,6 +106,7 @@ export class BibEntryStore {
     }
 
     this.mergedEntries = merged;
+    this.mergedEntryKeySet = seenKeys;
     return this.mergedEntries;
   }
 }

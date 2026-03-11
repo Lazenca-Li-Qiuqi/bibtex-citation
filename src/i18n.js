@@ -21,6 +21,7 @@ const en = {
     empty: "No BibTeX files are configured yet.",
     unavailable: "Refresh needed",
     loadErrorPrefix: "Index refresh failed: ",
+    invalidCitationPrefix: "Current document contains an unknown citation key: ",
     triggerHint:
       "Type [@query] in the editor to search citations from the configured files.",
     duplicateHint:
@@ -74,6 +75,7 @@ const zhCn = {
     empty: "暂未配置任何 BibTeX 文件。",
     unavailable: "待刷新",
     loadErrorPrefix: "刷新索引失败：",
+    invalidCitationPrefix: "当前文档包含未收录于文献库的 citation key：",
     triggerHint: "在编辑器中输入 [@query] 即可从已配置文件中检索引用。",
     duplicateHint: "当 citation key 重复时，会优先采用更靠前配置的文件。",
     citationCountHint:

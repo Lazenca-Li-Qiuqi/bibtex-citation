@@ -6,30 +6,26 @@
 
 ## 已完成
 
-- 梳理插件缓存架构，拆分文献库缓存与当前 Markdown 文档的轻量状态缓存，并新增 [`src/document/state.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\document\state.js)
-- 明确 `invalidateLibrary()` 与 `reloadLibraryNow()` 的语义边界，补充相关注释，避免设置变更和手动强制重载混在同一条路径上
-- 修复侧边栏“待刷新”状态与懒加载重读之间的同步问题，使输入 `[@query` 后可自动恢复真实的已索引条目数
-- 清理侧边栏重复的打开设置入口，并将状态文案改为更明确的“待刷新”
-- 调整活动栏引号图标与 `Refresh Cache` 按钮视觉样式，完成白色按钮、浅蓝交互态和大号引号图标的细节微调
+- 修正当前文档引用统计规则，改为按闭合右方括号回扫同一行最近左方括号，只统计真正闭合且 citation key 全部合法的引用块
+- 为文献库缓存补充合法 citation key 集合缓存，避免侧边栏每次统计时重复构建 key 集合
+- 为侧边栏增加非法 citation key 提示，并让输入或删除 `]` 时在下一帧立即刷新当前文档引用统计
+- 同步 `AGENTS.md` 项目记忆，并准备 `v0.2.5` patch 发布文件
 
 ## 主要方法与工具
 
 - `git status --short --branch`
-- `git tag --list --sort=-v:refname`
 - `git log --oneline --decorate -n 12`
 - `Get-Content AGENTS.md`
-- `Get-Content LAST_RUN.md`
+- `Get-Content CHANGELOG.md`
 - `Get-ChildItem -Recurse .\\src -Filter *.js | ForEach-Object { node --check $_.FullName }`
 - `apply_patch`
 
 ## 当前任务
 
-- 当前正在整理并发布 `v0.2.4`，主要覆盖缓存语义梳理、懒加载后的侧边栏自动同步，以及活动栏图标与刷新按钮样式微调
-- 代码层面的缓存边界已经比之前清楚，但 README、CHANGELOG 和版本文件仍需同步到这一轮实际行为
-- 当前工作区还保留与本轮发布直接相关的样式与侧边栏改动，尚未完成发布提交与 tag
+- 当前正在发布 `v0.2.5`，主要覆盖当前文档引用统计语义收敛、合法 key 缓存复用与 `]` 驱动的即时刷新
+- 版本文件、说明文档与项目记忆需要和这轮 patch 变更保持一致
 
 ## 下次继续
 
-- 继续完成 `v0.2.4` patch 发布，更新 [`CHANGELOG.md`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\CHANGELOG.md)、[`README.md`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\README.md)、[`manifest.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\manifest.json) 与 [`package.json`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\package.json)
-- 在 Typora 中手工回归活动栏引号图标的位置、`Refresh Cache` 按钮的 hover / active 效果，以及“待刷新”到自动恢复条目数的链路
-- 若视觉还需继续打磨，优先围绕活动栏图标的垂直位置和侧边栏状态层级做小步微调
+- 在 Typora 中手工回归 `[@key` 补全后立刻输入 `]`、删除 `]`、非法 citation key 报错与嵌套残缺方括号场景
+- 若继续细化引用统计，优先明确 `[note [@alpha]]` 这类嵌套文本是否应计入统计，并保持 README 与 AGENTS 的描述一致

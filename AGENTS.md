@@ -5,7 +5,7 @@
 - 项目名称：`bibtex-citation`
 - 当前工作区目录名与 Git 远程仓库名均已迁移为 `bibtex-citation`
 - 项目类型：Typora Community Plugin 插件
-- 当前发布目标版本：`0.2.4`
+- 当前最新已发布版本：`0.2.5`
 - 主要功能：在 Typora 的方括号引用语法中输入 `@query` 时，从配置的多个 BibTeX 文件中检索文献条目并插入引用键
 - 运行依赖：
   - Typora Community Plugin Framework
@@ -53,9 +53,9 @@
 - 当前仓库已完成一轮模块化重构，入口保持 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 稳定，核心逻辑迁移到 `src/`
 - 当前模块划分已覆盖插件主控、BibTeX 数据层、建议层、设置页与通用工具，但仍没有测试目录、构建产物目录或自动化检查脚本
 - `package.json` 当前仅保留一个占位性质的 `npm run build`，插件不再依赖原生模块构建
-- 最近提交已包含 `v0.1.0`、`v0.1.1`、`v0.1.2`、`v0.2.0`、`v0.2.1`、`v0.2.2` 与 `v0.2.3`，当前工作区主要进入 `v0.2.4` 缓存语义梳理与侧边栏视觉微调版本的发布收尾
-- 仓库已完成 `v0.2.3` 发布，当前正在整理并发布 `v0.2.4`，重点覆盖文献库失效/重载语义拆分、懒加载后的侧边栏同步，以及活动栏引号图标与刷新按钮视觉优化
-- 当前候选栏样式、点击选择、回车插入与越界修正已基本稳定，本轮重点转为缓存边界清理、侧边栏状态一致性和活动栏视觉打磨
+- 最近提交已包含 `v0.1.0`、`v0.1.1`、`v0.1.2`、`v0.2.0`、`v0.2.1`、`v0.2.2`、`v0.2.3`、`v0.2.4` 与 `v0.2.5`，当前 `HEAD` 将进入 `v0.2.5` 发布提交
+- `v0.2.5` 主要收敛当前文档引用统计语义：闭合块提取、非法 citation key 报错、以及输入或删除右方括号后的即时刷新
+- 当前候选栏样式、点击选择、回车插入与越界修正已基本稳定，后续重点可转向路径解析、检索体验与引用统计边界场景的手工回归
 
 ### 已知实现特征
 
@@ -67,6 +67,7 @@
 - `README.md` 已同步当前设置页交互与路径基准模式说明
 - 入口文件当前只保留 `export { default } from "./src/plugin.js";`，后续新增逻辑优先写入 `src/` 对应模块而不是回填 `main.js`
 - BibTeX 读取与缓存当前集中在 [`src/bibtex/store.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\bibtex\store.js)，当前区分“文献库缓存”和“当前文档轻量状态缓存”
+- 合法 citation key 集合当前由 [`src/bibtex/store.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\bibtex\store.js) 随合并文献库一起缓存为 `mergedEntryKeySet`，统计时直接复用，不会在每次侧边栏统计时重新构建
 - 候选栏交互事件当前集中在 [`src/suggest/interactions.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\suggest\interactions.js)，包括视口夹取、回车兜底插入与鼠标点击兜底
 - 插件作者元数据当前统一为 `Lazenca-Liqiuqi`，不再使用早期遗留的 `adam`
 - 项目记忆中的文件路径应统一指向当前 Typora 插件目录，不再引用旧的 `D:\Desktop\bibtex-citation`
@@ -81,29 +82,30 @@
 - 当候选栏打开但宿主没有真实选中项时，`Enter` 当前会直接插入第一条真实建议；这条行为是显式兜底，不代表宿主真的选中了第一项
 - “展开时默认真选中第一项” 已尝试过类名、模拟按键、hover 事件和最小运行时探针，最终放弃；后续除非重新接受这条需求，否则不要再继续在这条路线上投入时间
 - 左侧活动栏当前新增了一个 BibTeX 图标按钮，会切换到插件侧边栏面板，面板提供路径基准、文件数量、已索引条目数量与当前文档引用统计
-- 当前文档引用统计当前基于 `window.editor.getMarkdown()` 扫描方括号引用中的 `@citationKey`，内部同时统计唯一 citation key 数量与总出现次数，中文界面文案显示为“共 x 条 / y 次”
+- 当前文档引用统计当前基于 `window.editor.getMarkdown()` 逐行扫描，以每个 `]` 回找最近 `[` 提取闭合块；只统计其中全部 citation key 都能在当前文献库中找到的块，同时返回唯一 key 数量与总出现次数，中文界面文案显示为“共 x 条 / y 次”
+- 若某个闭合块中出现未收录于当前文献库的 citation key，侧边栏当前会把引用统计显示为“待刷新”，并在摘要区下方显示具体的非法 key 错误
 - 侧边栏摘要区当前使用上下两行布局显示标签和值，避免 `Path Base` 这类长选项文案挤在同一行
 - 设置页当前新增插件显示语言选择，仅提供 `English` 与 `简体中文` 两项；切换语言时只重建 i18n 并做不触发读库的轻重绘
 - 插件主控当前通过 `invalidateLibrary()` 标记 BibTeX 文献库失效，通过 `reloadLibraryNow()` 执行手动强制重读；两者语义已分开，不再混用
 - 当侧边栏因设置变更显示“待刷新”后，下一次输入 `[@query` 触发懒加载时，会自动同步刷新“已索引条目数”
+- 当前文档引用统计当前通过文档级 `keydown` 监听 `]`、`Backspace` 与 `Delete` 触发下一帧重算；若后续改动这条链路，优先保持“补上或删掉右方括号后立即刷新统计”的体验
 - 左侧活动栏图标当前改为大号引号字形，并通过 [`style.css`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\style.css) 微调位置；侧边栏当前仅保留 `Refresh Cache` 按钮，不再重复提供打开设置入口
 
 ## 计划
 
 ### 当前优先事项
 
-- 先维护好根目录 `AGENTS.md`，确保后续会话能快速恢复上下文
-- 在 Typora 中回归模块化重构后的真实加载与建议交互，优先确认导入链未影响插件注册
-- 在 Typora 中回归活动栏 BibTeX 面板的显示、切换、统计刷新与设置入口行为
+- 在 Typora 中回归 `v0.2.4` 的真实加载、建议交互与侧边栏状态切换，优先确认发布版本行为与记录一致
+- 在 Typora 中回归活动栏 BibTeX 面板的显示、切换与统计刷新行为
 - 在 Typora 中回归显示语言切换后的设置页、侧边栏标题、按钮文案与轻重绘表现
 - 在 Typora 中回归“待刷新”状态下输入 `[@query` 后，侧边栏已索引条目数是否会自动恢复为真实值
+- 在 Typora 中回归输入或删除 `]` 后，当前文档引用统计是否会在下一帧立即刷新，尤其是 `Enter` 补全 citation key 后紧接着输入 `]` 的场景
 - 如果继续开发，优先验证设置页对多个路径输入的可用性与易用性
 - 补充最小可执行的调试流程说明，尤其是 BibTeX 文件路径配置与检索结果验证
 - 品牌迁移已完成，后续重点转为改进路径解析与检索体验
-- 继续补充最小可执行的发布与回归验证说明，尤其是首次发布后的手工检查步骤
+- 继续补充最小可执行的回归验证说明，尤其是每次发布后的手工检查步骤
 - 持续验证待选框在靠右输入、误按回车、重新聚焦后重新触发时的定位稳定性
-- 如果继续美化，优先细化年份标签、选中态和列表整体层次，而不是继续放大候选框宽度
-- 如果继续美化，优先验证 DOI、期刊名与作者在窄宽度下的层级是否稳定，再决定是否继续压缩宽度
+- 如果继续美化，优先细化年份标签、选中态和列表整体层次，并验证 DOI、期刊名与作者在窄宽度下的层级稳定性
 - 若继续完善引用工作流，优先围绕 `[@a; @b]` 这类多文献场景做手工回归，而不是恢复正文裸 `@` 触发
 - 若继续扩展侧边栏，优先考虑把“待刷新”“重载失败”“已索引完成”三种状态做成更明确的视觉层级
 
@@ -138,6 +140,7 @@
 - 检查主入口语法：`node --check main.js`
 - 检查 `src/` 下所有模块语法：`Get-ChildItem -Recurse .\src -Filter *.js | ForEach-Object { node --check $_.FullName }`
 - 检查候选栏触发与点击兜底相关实现：`rg -n "findQuery|registerSuggestInteractions|getSelectedBibtexSuggestionKey|translateX" src`
+- 检查当前文档引用统计与 `]` 刷新链路：`rg -n "getCitationState|extractClosedBracketBlocks|getEntryKeySet|scheduleCitationStateRefresh|handleCitationStateKeydown" src`
 
 ### 调试与排查提示
 
@@ -145,6 +148,7 @@
 - 若插件重构后无法加载，先检查 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 到 [`src/plugin.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\plugin.js) 的导入链是否正常
 - 若候选项不出现，先检查设置页里的 BibTeX 文件路径是否正确；相对路径默认相对当前 Markdown 文件目录解析
 - 若检索结果异常，优先检查 BibTeX 条目格式是否属于常见写法，以及是否存在重复 citation key
+- 若当前文档引用统计异常，先检查 [`src/document/state.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\document\state.js) 的闭合块提取规则、[`src/bibtex/store.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\bibtex\store.js) 的 `mergedEntryKeySet` 是否失效，以及 [`src/suggest/interactions.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\suggest\interactions.js) 的 `keydown` 刷新链路是否仍在
 - 若候选项渲染异常，先确认 `renderSuggestion` 仍返回 HTML 字符串而不是 DOM 节点
 - 若待选框位置异常，优先检查 `clampSuggestContainerToViewport` 是否还在使用 `transform` 而非累积改写 `left`
 - 若用户反馈“回车能插入第一项但视觉上没真选中”，先记住这是已知取舍，不要再用伪高亮冒充宿主真选中态

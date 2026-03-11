@@ -74,6 +74,14 @@ function shouldSuppressFollowupPointerEvent(until) {
   return Number.isFinite(until) && Date.now() <= until;
 }
 
+function shouldScheduleCitationRefreshFromKeydown(event) {
+  if (event.isComposing) {
+    return false;
+  }
+
+  return event.key === "]" || event.key === "Backspace" || event.key === "Delete";
+}
+
 function applySuggestionFromCurrentState(suggest, replacementText) {
   const editor = window.editor;
   const anchor = editor?.autoComplete?.state?.anchor;
@@ -119,6 +127,18 @@ export function registerSuggestInteractions(plugin) {
 
   plugin.registerDomEvent(window, "resize", () => {
     plugin._scheduleSuggestClamp();
+  });
+
+  plugin._handleCitationStateKeydown = (event) => {
+    if (!shouldScheduleCitationRefreshFromKeydown(event)) {
+      return;
+    }
+
+    plugin.scheduleCitationStateRefresh();
+  };
+  document.addEventListener("keydown", plugin._handleCitationStateKeydown, true);
+  plugin.register(() => {
+    document.removeEventListener("keydown", plugin._handleCitationStateKeydown, true);
   });
 
   plugin._handleSuggestEnterKey = (event) => {

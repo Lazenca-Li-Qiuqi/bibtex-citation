@@ -22,6 +22,7 @@ export default class BibCitationPlugin extends Plugin {
     this.bibStore = new BibEntryStore(this);
     this.documentState = new CurrentDocumentState();
     this._sidebarRefreshScheduled = false;
+    this._citationStateRefreshScheduled = false;
   }
 
   /**
@@ -57,11 +58,12 @@ export default class BibCitationPlugin extends Plugin {
   /**
    * 功能：获取当前文档引用统计，并复用轻量状态缓存。
    * 输入：无。
-   * 输出：包含唯一条数与总次数的统计对象。
+   * 输出：包含唯一条数、总次数与错误信息的对象。
    */
-  getCurrentDocumentCitationCount() {
+  getCurrentDocumentCitationState() {
     const markdown = window.editor?.getMarkdown?.() || "";
-    return this.documentState.getCitationCount(markdown);
+    const validCitationKeys = this.bibStore.getEntryKeySet();
+    return this.documentState.getCitationState(markdown, validCitationKeys);
   }
 
   /**
@@ -90,6 +92,24 @@ export default class BibCitationPlugin extends Plugin {
     this._sidebarRefreshScheduled = true;
     window.requestAnimationFrame(() => {
       this._sidebarRefreshScheduled = false;
+      this.sidebarPanel?.render?.();
+    });
+  }
+
+  /**
+   * 功能：在编辑器中的 `]` 发生输入或删除后，异步重算当前文档引用统计并刷新侧边栏。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  scheduleCitationStateRefresh() {
+    if (this._citationStateRefreshScheduled) {
+      return;
+    }
+
+    this._citationStateRefreshScheduled = true;
+    window.requestAnimationFrame(() => {
+      this._citationStateRefreshScheduled = false;
+      this.resetDocumentState();
       this.sidebarPanel?.render?.();
     });
   }

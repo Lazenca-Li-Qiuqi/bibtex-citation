@@ -42,14 +42,15 @@ export class BibCitationSidebarPanel extends SidebarPanel {
     const t = this.plugin.i18n.t.sidebar;
     const paths = parseBibFileList(this.plugin.settings.get("bibFiles"));
     const pathBase = this.plugin.settings.get("pathBase");
-    const citedCount = this.plugin.getCurrentDocumentCitationCount();
 
     let entryCount = 0;
     let loadError = "";
+    let citationState = { counts: { unique: 0, total: 0 }, error: "" };
 
     if (allowLibraryLoad) {
       try {
         entryCount = this.plugin.getBibEntries().length;
+        citationState = this.plugin.getCurrentDocumentCitationState();
       } catch (error) {
         loadError = error?.message || String(error);
       }
@@ -63,10 +64,16 @@ export class BibCitationSidebarPanel extends SidebarPanel {
         [t.pathBaseLabel, getPathBaseLabel(pathBase, this.plugin.i18n.t.settings.pathBase)],
         [t.configuredFilesLabel, String(paths.length)],
         [t.indexedEntriesLabel, loadError || entryCount === null ? t.unavailable : String(entryCount)],
-        [t.citedEntriesLabel, formatCitationCount(t.citationCountFormat, citedCount)],
+        [
+          t.citedEntriesLabel,
+          citationState.error
+            ? t.unavailable
+            : formatCitationCount(t.citationCountFormat, citationState.counts),
+        ],
       ]),
       createActions([[t.refreshButton, () => this.handleRefresh()]]),
       loadError ? createError(t.loadErrorPrefix + loadError) : null,
+      citationState.error ? createError(t.invalidCitationPrefix + citationState.error) : null,
       paths.length ? createPathList(paths, t.filesTitle) : createEmpty(t.empty),
       createFootnote(t.triggerHint),
       createFootnote(t.duplicateHint),
