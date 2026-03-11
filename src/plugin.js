@@ -1,7 +1,7 @@
 const { Plugin } = window[Symbol.for("typora-plugin-core@v2")];
 
-import { DEFAULT_SETTINGS, PATH_BASE_MODE } from "./constants.js";
-import { i18n } from "./i18n.js";
+import { DEFAULT_SETTINGS, DISPLAY_LANGUAGE, PATH_BASE_MODE } from "./constants.js";
+import { createI18n } from "./i18n.js";
 import { BibEntryStore } from "./bibtex/store.js";
 import { parseBibFileList, serializeBibFileList } from "./bibtex/settings.js";
 import { BibCitationSettingTab } from "./settings/tab.js";
@@ -17,8 +17,19 @@ import { registerSuggestInteractions } from "./suggest/interactions.js";
 export default class BibCitationPlugin extends Plugin {
   constructor() {
     super(...arguments);
-    this.i18n = i18n;
+    this.i18n = createI18n();
     this.bibStore = new BibEntryStore(this);
+  }
+
+  /**
+   * 功能：根据当前设置重建国际化实例，供设置页与侧边栏即时切换语言。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  refreshI18n() {
+    this.i18n = createI18n(
+      this.settings?.get("displayLanguage") || DISPLAY_LANGUAGE.ZH_CN,
+    );
   }
 
   /**
@@ -61,6 +72,11 @@ export default class BibCitationPlugin extends Plugin {
       "pathBase",
       this.settings.get("pathBase") || PATH_BASE_MODE.MARKDOWN,
     );
+    this.settings.set(
+      "displayLanguage",
+      this.settings.get("displayLanguage") || DISPLAY_LANGUAGE.ZH_CN,
+    );
+    this.refreshI18n();
 
     this.registerSettingTab(new BibCitationSettingTab(this));
     this.register(this.app.workspace.sidebar.addPanel(new BibCitationSidebarPanel(this)));

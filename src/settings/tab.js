@@ -1,6 +1,6 @@
 const { SettingTab, Notice } = window[Symbol.for("typora-plugin-core@v2")];
 
-import { PATH_BASE_MODE } from "../constants.js";
+import { DISPLAY_LANGUAGE, PATH_BASE_MODE } from "../constants.js";
 import { shouldRejectRelativePath } from "../bibtex/path-resolver.js";
 import { parseBibFileList, serializeBibFileList } from "../bibtex/settings.js";
 
@@ -16,7 +16,7 @@ export class BibCitationSettingTab extends SettingTab {
   }
 
   get name() {
-    return "BibTeX Citations";
+    return this.plugin.i18n.t.pluginName;
   }
 
   onload() {
@@ -32,6 +32,33 @@ export class BibCitationSettingTab extends SettingTab {
     if (!container.empty) {
       container.innerHTML = "";
     }
+
+    this.addSetting((s) => {
+      s.addName(t.settings.language.name);
+      s.addDescription(t.settings.language.desc);
+      s.addSelect((select) => {
+        const options = [
+          [DISPLAY_LANGUAGE.EN, t.settings.language.en],
+          [DISPLAY_LANGUAGE.ZH_CN, t.settings.language.zhCn],
+        ];
+        const selectEl = $(select);
+        options.forEach(([value, label]) => {
+          selectEl.append(
+            $("<option>")
+              .attr("value", value)
+              .text(label),
+          );
+        });
+        selectEl.val(plugin.settings.get("displayLanguage"));
+        selectEl.on("change", (event) => {
+          const value = $(event.target).val();
+          plugin.settings.set("displayLanguage", value);
+          plugin.refreshI18n();
+          this.render();
+          new Notice(plugin.i18n.t.settingsSaved);
+        });
+      });
+    });
 
     this.addSetting((s) => {
       s.addName(t.settings.pathBase.name);
