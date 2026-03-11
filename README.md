@@ -1,12 +1,12 @@
 # bibtex-citation
 
-`bibtex-citation` 是一个 Typora Community Plugin 插件，用于在 Typora 的方括号引用语法中输入 `@query` 时，从一个或多个已配置的本地 BibTeX 文件中检索文献条目，并插入对应的引用键。
+`bibtex-citation` 是一个 Typora Community Plugin 插件，用于在 Typora 的方括号引用语法中输入 `@query` 时，从一个或多个已配置的本地 BibTeX 文件中检索文献条目，并插入对应的引用键；也支持基于单个本地 `.csl` 文件把严格合法的 citation block 渲染为文中引用。
 
-插件只会读取你在设置中配置的 `.bib` 文件，并在选中候选项后插入 `@citationKey`。它不会修改任何 `.bib` 文件，也不依赖外部参考文献管理器、SQLite、原生 Node 模块或第三方 npm 包。
+插件只会读取你在设置中配置的 `.bib` 文件与 `.csl` 文件，并在文档中插入 citation key 或渲染后的文中引用。它不会修改任何 `.bib` 文件，也不依赖外部参考文献管理器或 SQLite。
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.5`。
+当前文档对应发布版本：`0.2.6`。
 
 ## 功能概览
 
@@ -26,6 +26,7 @@
 - Typora
 - Typora Community Plugin Framework
 - 一个或多个本地 `.bib` 文件
+- 如需使用 `Render Citations / 渲染引用`，还需要一个可读取的本地 `.csl` 文件
 
 ## 安装
 
@@ -54,6 +55,8 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 ```
 
 将插件目录放到正确位置后，请在插件目录下执行一次 `npm install`。当前项目不需要额外构建步骤。
+
+当前 `npm install` 主要用于安装 citation 渲染依赖，例如 `@citation-js/core` 与 `@citation-js/plugin-csl`。
 
 ### 启用插件
 
@@ -140,7 +143,7 @@ D:/Literature/shared.bib
 [@smith2024example; @doe2023study]
 ```
 
-插件只会插入引用键，不会自动展开完整参考文献格式，也不会修改原始 `.bib` 文件。
+候选列表插入这一步只会写入引用键，不会自动展开完整参考文献格式，也不会修改原始 `.bib` 文件。
 
 ### 4. 使用侧边栏 BibTeX 面板
 
@@ -170,7 +173,41 @@ D:/Literature/shared.bib
 (Smith 2024; Doe 2023)
 ```
 
+这一步属于“替换式渲染”：执行后，原始的 `[@key]` 会被直接替换成渲染后的文中引用文本。
+
+若当前样式本身要求上标数字引用，例如 `nature` 一类样式，渲染结果也可能直接写成 HTML 上标，例如：
+
+```html
+<sup>1,2</sup>
+```
+
 而像 `[see @smith2024example]`、`[@smith2024example, p. 3]`、`[smith2024example]` 这类包含说明文字、locator，或本身不是严格 CSL 引用块的片段，当前不会自动改写。
+
+## 当前支持的 CSL 特性
+
+下表描述的是当前插件在“`Render Citations / 渲染引用`”这条链路上，对 CSL 文内引用相关能力的支持范围。
+
+| 特性 | 当前状态 | 说明 |
+| --- | --- | --- |
+| 单条合法 citation block `[@key]` | 已支持 | 会按当前配置的 `.csl` 样式渲染为文中引用 |
+| 多条合法 citation block `[@a; @b]` | 已支持 | 支持一个闭合块中用分号分隔多个 citation key |
+| 不同作者、不同年份的排序 | 已支持 | 排序规则交给 `.csl` 样式和 CSL 处理器决定，插件不手写排序规则 |
+| 同作者同年 `2024a/2024b` 消歧 | 已支持 | 当前会结合整篇文档上下文与 bibliography 顺序做稳定消歧 |
+| 数字型引用 | 已支持 | 如 `ieee`、`vancouver`、`nature` 这类样式会输出数字编号 |
+| 上标型数字引用 | 已支持 | 当前直接使用 CSL 的 `html` 输出；像 `nature.csl` 会生成 `<sup>...</sup>` |
+| 机构作者 | 已支持 | 会按 CSL 输出结果渲染，不强制拆成个人姓名 |
+| bibliography 顺序驱动的 citation-number | 已支持 | 数字编号最终跟随样式定义的 bibliography 规则，而不是插件自定义规则 |
+| 前缀说明，如 `[see @key]` | 暂不支持 | 这类块当前会保持原样，不做改写 |
+| locator，如 `[@key, p. 3]` | 暂不支持 | 页码、章节号等 locator 目前不会参与渲染 |
+| suffix / 更复杂 citation cluster 语法 | 暂不支持 | 当前仅支持严格的 `[@a; @b]` 形式 |
+| 脚注 / 尾注 note-style citation | 暂不支持 | 当前实现是原地替换正文，不会自动创建脚注结构 |
+| 自动生成 bibliography | 暂不支持 | 当前仓库只支持文内 citation 渲染，参考文献表功能还未接入 |
+
+补充说明：
+
+- 当前渲染输出优先使用 CSL 的 `html` 结果，因此某些样式可能会写入 HTML 实体，例如 `&#38;`
+- 对大多数普通 author-date / numeric 样式，这不会影响 Typora 中的显示效果
+- 当前只处理严格闭合且 key 全部存在于文献库中的 citation block；包含未知 key 的块会保持原样
 
 ## 相对路径解析规则
 

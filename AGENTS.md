@@ -5,7 +5,7 @@
 - 项目名称：`bibtex-citation`
 - 当前工作区目录名与 Git 远程仓库名均已迁移为 `bibtex-citation`
 - 项目类型：Typora Community Plugin 插件
-- 当前最新已发布版本：`0.2.5`
+- 当前最新已发布版本：`0.2.6`
 - 主要功能：在 Typora 的方括号引用语法中输入 `@query` 时，从配置的多个 BibTeX 文件中检索文献条目并插入引用键
 - 运行依赖：
   - Typora Community Plugin Framework
@@ -22,6 +22,7 @@
 - [`src/constants.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\constants.js)：默认设置与路径模式等共享常量
 - [`src/i18n.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\i18n.js)：插件国际化文案
 - [`src/bibtex/`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\bibtex)：BibTeX 设置序列化、路径解析、条目解析与缓存读取
+- [`src/csl/`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\csl)：CSL 模板注册、BibTeX 到 CSL-JSON 映射与 citation 渲染
 - [`src/suggest/`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\suggest)：引用建议查询、候选项 HTML 渲染与键鼠交互兜底
 - [`src/settings/tab.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\settings\tab.js)：设置页 UI 与 BibTeX 路径维护
 - [`src/utils/html.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\utils\html.js)：文本规范化与 HTML 转义工具
@@ -53,9 +54,8 @@
 - 当前仓库已完成一轮模块化重构，入口保持 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 稳定，核心逻辑迁移到 `src/`
 - 当前模块划分已覆盖插件主控、BibTeX 数据层、建议层、设置页与通用工具；运行时已接入可配置的外部 CSL 文件与 citation 渲染，但仓库当前仍没有受版本控制的自动化测试目录
 - `package.json` 当前仅保留一个占位性质的 `npm run build`，插件不再依赖原生模块构建
-- 最近提交已包含 `v0.1.0`、`v0.1.1`、`v0.1.2`、`v0.2.0`、`v0.2.1`、`v0.2.2`、`v0.2.3`、`v0.2.4` 与 `v0.2.5`，当前 `HEAD` 将进入 `v0.2.5` 发布提交
-- `v0.2.5` 主要收敛当前文档引用统计语义：闭合块提取、非法 citation key 报错、以及输入或删除右方括号后的即时刷新
-- 当前候选栏样式、点击选择、回车插入与越界修正已基本稳定，后续重点可转向路径解析、检索体验与引用统计边界场景的手工回归
+- 最近工作已从 `v0.2.5` 的引用统计收敛继续推进到 CSL citation 渲染：当前支持外部 `CSL File`、严格 citation block 渲染、同作者同年稳定消歧与上标 HTML 输出
+- 当前候选栏样式、点击选择、回车插入与越界修正已基本稳定；当前开发重点已从建议交互逐步转向 CSL 引用工作流与后续 bibliography 生成
 - 当前设置页已支持单个 `CSL File` 路径，并复用 `Path Base` 的三种解析模式；citation 渲染在点击按钮时懒加载，不再阻塞插件启动
 
 ### 已知实现特征
@@ -94,30 +94,24 @@
 - `Render Citations` 当前只处理严格合法的 `[@key]` / `[@a; @b]` 闭合块；带前缀说明、locator、未知 key 或逗号分隔的块会保持原样
 - CSL 相关模块当前必须通过懒加载进入启动链，并使用 `createRequire(import.meta.url)` 解析插件目录内的 `@citation-js/*` 依赖，否则 Typora 设置页与侧边栏可能整块消失
 - 同作者同年 citation 当前按整篇文档上下文与 bibliography 排序做稳定消歧，因此 `2024a/2024b` 的分配与显示顺序由样式排序决定，不按 citation key 名中的字母决定
+- citation 渲染当前优先使用 CSL 的 `html` 输出而不是 `text` 输出；`nature` 这类样式会直接生成 `<sup>...</sup>` 上标 HTML，普通样式可能同时带有诸如 `&#38;` 的 HTML 实体
 - 本地 `tests/` 目录当前仅作为临时开发测试区使用，并被 `.gitignore` 整体忽略；不要在 README、package.json 或发布说明中把其中脚本当成受支持的仓库接口
+- README 当前包含一张“当前支持的 CSL 特性”表；若后续继续扩 locator、note-style 或 bibliography，需同步更新这张表，避免对外能力描述过度
 
 ## 计划
 
 ### 当前优先事项
 
-- 在 Typora 中回归 `v0.2.4` 的真实加载、建议交互与侧边栏状态切换，优先确认发布版本行为与记录一致
-- 在 Typora 中回归活动栏 BibTeX 面板的显示、切换与统计刷新行为
-- 在 Typora 中回归显示语言切换后的设置页、侧边栏标题、按钮文案与轻重绘表现
-- 在 Typora 中回归“待刷新”状态下输入 `[@query` 后，侧边栏已索引条目数是否会自动恢复为真实值
-- 在 Typora 中回归输入或删除 `]` 后，当前文档引用统计是否会在下一帧立即刷新，尤其是 `Enter` 补全 citation key 后紧接着输入 `]` 的场景
-- 如果继续开发，优先验证设置页对多个路径输入的可用性与易用性
-- 补充最小可执行的调试流程说明，尤其是 BibTeX 文件路径配置与检索结果验证
-- 品牌迁移已完成，后续重点转为改进路径解析与检索体验
-- 继续补充最小可执行的回归验证说明，尤其是每次发布后的手工检查步骤
-- 持续验证待选框在靠右输入、误按回车、重新聚焦后重新触发时的定位稳定性
-- 如果继续美化，优先细化年份标签、选中态和列表整体层次，并验证 DOI、期刊名与作者在窄宽度下的层级稳定性
-- 若继续完善引用工作流，优先围绕 `[@a; @b]` 这类多文献场景做手工回归，而不是恢复正文裸 `@` 触发
-- 若继续扩展侧边栏，优先考虑把“待刷新”“重载失败”“已索引完成”三种状态做成更明确的视觉层级
+- 在 Typora 真机里继续回归 `CSL File` 路径配置、侧边栏按钮、citation 渲染与插件启动稳定性
+- 设计 bibliography 生成入口、插入锚点和文档内 key 收集策略，优先避免与当前“替换式 citation 渲染”互相打架
+- 若继续扩展 CSL 能力，优先评估 locator、复杂 citation cluster 与 note-style 的支持方式，并同步更新 README 的支持矩阵
+- 持续验证活动栏 BibTeX 面板、显示语言切换、当前文档引用统计与 `Refresh Cache` 的联动是否稳定
 
 ### 建议后续改进
 
 - 继续细化 [`src/plugin.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\plugin.js) 的装配职责，必要时再抽出更清晰的启动/注册层
 - 为 BibTeX 解析与检索排序提取更细的纯函数，降低对 Typora 运行时的耦合，便于测试
+- 继续补齐 BibTeX 到 CSL-JSON 的字段映射，优先关注 `booktitle`、更完整日期、`editor` 与 `volume/issue/page` 这类会影响排序和样式兼容性的字段
 - 增加至少一层手工验证清单或自动化测试脚本，覆盖：
   - 多个 `.bib` 文件加载成功
   - `@query` 候选项检索

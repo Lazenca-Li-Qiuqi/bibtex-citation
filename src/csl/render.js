@@ -7,7 +7,7 @@ const { Cite } = pluginRequire("@citation-js/core");
 
 /**
  * 功能：把当前文档中严格匹配 `[@key; @other]` 的合法引用块渲染为 CSL 文中引用。
- * 输入：Markdown 文本、BibTeX 条目数组、目标 locale。
+ * 输入：Markdown 文本、BibTeX 条目数组、已注册的 CSL 模板名。
  * 输出：返回改写后的 Markdown 与渲染统计。
  */
 export function renderCitationMarkdown(markdown, entries, templateName) {
@@ -170,7 +170,7 @@ function renderCitationCluster(
 
   return cite.format("citation", {
     template: templateName,
-    format: "text",
+    format: "html",
     entry: sortCitationKeys(citationBlock.keys, citationOrder),
     citationsPre,
     citationsPost,
