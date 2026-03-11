@@ -89,8 +89,10 @@ export class BibCitationSidebarPanel extends SidebarPanel {
 }
 
 function createRibbonIcon() {
-  const icon = document.createElement("i");
-  icon.className = "fa fa-book";
+  const icon = document.createElement("span");
+  icon.className = "bibtex-sidebar-ribbon-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "“";
   return icon;
 }
 

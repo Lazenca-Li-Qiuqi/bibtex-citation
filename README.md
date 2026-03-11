@@ -6,7 +6,7 @@
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.3`。
+当前文档对应发布版本：`0.2.4`。
 
 ## 功能概览
 
@@ -64,7 +64,7 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 
 启用插件后，打开插件设置，可以在 `BibTeX Files` 区域逐条维护 `.bib` 文件路径。
 
-你也可以在设置页顶部通过 `Display Language / 显示语言` 切换插件界面语言。切换后插件会自动执行一次缓存刷新，并立即更新侧边栏文案。
+你也可以在设置页顶部通过 `Display Language / 显示语言` 切换插件界面语言。切换后插件会立即更新设置页与侧边栏文案，但不会强制重新读取 `.bib` 文件。
 
 推荐流程：
 
@@ -147,7 +147,8 @@ D:/Literature/shared.bib
 - 查看当前已索引条目数量
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
 - 手动执行 `Refresh Cache`
-- 快速打开插件设置
+
+当你修改 `Path Base` 或 BibTeX 文件列表后，侧边栏中的 `Indexed Entries` 会先显示“待刷新”。此时如果你手动点击 `Refresh Cache`，或直接在文档里输入 `[@query` 触发建议检索，插件都会重新读取文献库并把已索引条目数恢复为真实值。
 
 ## 相对路径解析规则
 
@@ -217,6 +218,6 @@ secondary.bib
 
 - 插件 ID：`bibtex-citation`
 - 插件名称：`BibTeX Citations`
-- 当前版本：`0.2.3`
+- 当前版本：`0.2.4`
 - 支持平台：Windows、Linux、macOS
 - 本仓库和本地插件目录都应使用名称 `bibtex-citation`
