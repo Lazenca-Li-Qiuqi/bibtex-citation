@@ -41,6 +41,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
     const { allowLibraryLoad = true } = options;
     const t = this.plugin.i18n.t.sidebar;
     const paths = parseBibFileList(this.plugin.settings.get("bibFiles"));
+    const cslFile = this.plugin.settings.get("cslFile") || "";
     const pathBase = this.plugin.settings.get("pathBase");
 
     let entryCount = 0;
@@ -62,6 +63,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       createHeading(t.heading, t.description),
       createSummaryGrid([
         [t.pathBaseLabel, getPathBaseLabel(pathBase, this.plugin.i18n.t.settings.pathBase)],
+        [t.cslFileLabel, cslFile || t.unavailable],
         [t.configuredFilesLabel, String(paths.length)],
         [t.indexedEntriesLabel, loadError || entryCount === null ? t.unavailable : String(entryCount)],
         [
@@ -103,9 +105,9 @@ export class BibCitationSidebarPanel extends SidebarPanel {
    * 输入：无。
    * 输出：无返回值。
    */
-  handleRenderCitations() {
+  async handleRenderCitations() {
     try {
-      const result = this.plugin.renderCurrentDocumentCitations();
+      const result = await this.plugin.renderCurrentDocumentCitations();
       if (!result.changed) {
         new Notice(this.plugin.i18n.t.sidebar.renderNoChanges);
         return;

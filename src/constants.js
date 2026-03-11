@@ -13,6 +13,7 @@ export const DISPLAY_LANGUAGE = {
 
 export const DEFAULT_SETTINGS = {
   bibFiles: "",
+  cslFile: "",
   pathBase: PATH_BASE_MODE.MARKDOWN,
   displayLanguage: DISPLAY_LANGUAGE.ZH_CN,
 };

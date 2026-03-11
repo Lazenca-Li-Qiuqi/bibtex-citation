@@ -4,16 +4,19 @@ const en = {
   pluginName: "BibTeX Citations",
   fileNotFound: "BibTeX file not found: ",
   loadError: "Failed to load BibTeX files: ",
+  cslFileNotFound: "CSL file not found: ",
+  cslPathRequired: "Please configure a CSL file path first.",
   settingsSaved: "Settings updated.",
   emptyPathWarning: "Please enter a BibTeX file path first.",
   absolutePathRequired:
-    "This path mode only accepts absolute BibTeX file paths.",
+    "This path mode only accepts absolute file paths.",
   sidebar: {
     title: "BibTeX Citations",
     heading: "BibTeX Citations",
     description:
       "Review the current BibTeX configuration, indexed entries, and quick actions.",
     pathBaseLabel: "Path Base",
+    cslFileLabel: "CSL File",
     configuredFilesLabel: "Configured Files",
     indexedEntriesLabel: "Indexed Entries",
     citedEntriesLabel: "Cited In Current Doc",
@@ -35,7 +38,7 @@ const en = {
     citationCountHint:
       "The current-document count shows both unique citation keys and total citation occurrences found in bracket citations.",
     renderHint:
-      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the bundled American Meteorological Society style.",
+      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the configured CSL file.",
     citationCountFormat: "{unique} unique / {total} total",
     filesTitle: "BibTeX Files",
   },
@@ -48,7 +51,7 @@ const en = {
     },
     pathBase: {
       name: "Path Base",
-      desc: "Choose how non-absolute BibTeX file paths should be resolved.",
+      desc: "Choose how non-absolute BibTeX and CSL file paths should be resolved.",
       markdown: "Relative to the current Markdown file",
       typora: "Relative to the folder currently opened in Typora",
       absolute: "Absolute paths only",
@@ -61,6 +64,12 @@ const en = {
       placeholder: "./references.bib",
       remove: "Remove",
     },
+    cslFile: {
+      name: "CSL File",
+      desc: "Configure a single CSL style file used to render in-text citations and the future bibliography.",
+      placeholder: "./styles/american-meteorological-society.csl",
+      clear: "Clear",
+    },
   },
 };
 
@@ -68,14 +77,17 @@ const zhCn = {
   pluginName: "BibTeX 引用",
   fileNotFound: "未找到 BibTeX 文件：",
   loadError: "加载 BibTeX 文件失败：",
+  cslFileNotFound: "未找到 CSL 文件：",
+  cslPathRequired: "请先配置一个 CSL 文件路径。",
   settingsSaved: "设置已更新。",
   emptyPathWarning: "请先输入 BibTeX 文件路径。",
-  absolutePathRequired: "当前路径模式仅接受绝对 BibTeX 文件路径。",
+  absolutePathRequired: "当前路径模式仅接受绝对文件路径。",
   sidebar: {
     title: "BibTeX 引用",
     heading: "BibTeX 引用",
     description: "查看当前 BibTeX 配置、索引状态与快捷操作。",
     pathBaseLabel: "路径基准",
+    cslFileLabel: "CSL 文件",
     configuredFilesLabel: "已配置文件数",
     indexedEntriesLabel: "已索引条目数",
     citedEntriesLabel: "当前文档引用统计",
@@ -95,7 +107,7 @@ const zhCn = {
     citationCountHint:
       "当前文档统计基于方括号引用中的 citation key，同时显示唯一文献数与总出现次数。",
     renderHint:
-      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按内置 American Meteorological Society 样式生成的文中引用。",
+      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按当前配置的 CSL 文件生成的文中引用。",
     citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },
@@ -108,7 +120,7 @@ const zhCn = {
     },
     pathBase: {
       name: "路径基准",
-      desc: "选择非绝对 BibTeX 路径的解析基准。",
+      desc: "选择非绝对 BibTeX 与 CSL 路径的解析基准。",
       markdown: "相对当前 Markdown 文件",
       typora: "相对 Typora 当前打开的文件夹",
       absolute: "仅接受绝对路径",
@@ -120,6 +132,12 @@ const zhCn = {
       empty: "暂未配置任何 BibTeX 文件。",
       placeholder: "./references.bib",
       remove: "删除",
+    },
+    cslFile: {
+      name: "CSL 文件",
+      desc: "配置一个单独的 CSL 样式文件，用于渲染文中引用以及后续的参考文献表。",
+      placeholder: "./styles/american-meteorological-society.csl",
+      clear: "清空",
     },
   },
 };

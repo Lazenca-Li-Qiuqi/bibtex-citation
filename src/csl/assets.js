@@ -1,67 +1,46 @@
-import { plugins } from "@citation-js/core";
-import "@citation-js/plugin-csl";
-import { createRequire } from "node:module";
+import { resolveCslFilePath } from "../bibtex/path-resolver.js";
+import { getPluginRequire } from "./runtime.js";
 
-const reqnode =
-  globalThis.window?.reqnode?.bind(globalThis.window) ||
-  createRequire(import.meta.url) ||
-  null;
+const fs = window.reqnode("fs");
+const path = window.reqnode("path");
+const pluginRequire = getPluginRequire();
+const { plugins } = pluginRequire("@citation-js/core");
+pluginRequire("@citation-js/plugin-csl");
 
-if (!reqnode) {
-  throw new Error("Node runtime is required for CSL asset loading.");
-}
-
-const fs = reqnode("fs");
-const path = reqnode("path");
-const { fileURLToPath } = reqnode("url");
-
-const DEFAULT_TEMPLATE_NAME = "bibtex-citation-default-ams";
-const DEFAULT_STYLE_FILE = "american-meteorological-society.csl";
-const LOCALE_FILES = {
-  "en-US": "locales-en-US.xml",
-  "zh-CN": "locales-zh-CN.xml",
-};
-
-let defaultTemplateRegistered = false;
-const registeredLocales = new Set();
+let customTemplateCacheKey = "";
+let customTemplateName = "";
 
 /**
- * 功能：确保默认 CSL 模板与所需 locale 已注册到 Citation.js。
- * 输入：locale 语言标签。
- * 输出：返回可直接用于 Citation.js 的模板名与 locale 名。
+ * 功能：确保用户配置的 CSL 模板已注册到 Citation.js。
+ * 输入：插件实例。
+ * 输出：返回可直接用于 Citation.js 的模板名。
  */
-export function ensureDefaultCslAssets(localeName) {
-  const normalizedLocale = LOCALE_FILES[localeName] ? localeName : "en-US";
+export function ensureCslTemplate(plugin) {
   const config = plugins.config.get("@csl");
-
-  if (!defaultTemplateRegistered) {
-    config.templates.add(
-      DEFAULT_TEMPLATE_NAME,
-      readFixtureFile(path.join("styles", DEFAULT_STYLE_FILE)),
-    );
-    defaultTemplateRegistered = true;
-  }
-
-  if (!registeredLocales.has(normalizedLocale)) {
-    config.locales.add(
-      normalizedLocale,
-      readFixtureFile(path.join("locales", LOCALE_FILES[normalizedLocale])),
-    );
-    registeredLocales.add(normalizedLocale);
-  }
-
-  return {
-    template: DEFAULT_TEMPLATE_NAME,
-    locale: normalizedLocale,
-  };
+  return ensureConfiguredTemplate(plugin, config);
 }
 
-function readFixtureFile(relativePath) {
-  return fs.readFileSync(resolveFixturePath(relativePath), "utf8");
-}
+function ensureConfiguredTemplate(plugin, config) {
+  const configuredPath = resolveCslFilePath(plugin?.settings?.get("cslFile"), plugin);
+  if (!configuredPath) {
+    throw new Error(plugin.i18n.t.cslPathRequired);
+  }
 
-function resolveFixturePath(relativePath) {
-  const currentFilePath = fileURLToPath(import.meta.url);
-  const pluginRoot = path.resolve(path.dirname(currentFilePath), "..", "..");
-  return path.join(pluginRoot, "fixtures", "csl", relativePath);
+  if (!fs.existsSync(configuredPath)) {
+    throw new Error(`${plugin.i18n.t.cslFileNotFound}${configuredPath}`);
+  }
+
+  const stat = fs.statSync(configuredPath);
+  const templateCacheKey = `${configuredPath}:${stat.mtimeMs}`;
+  if (customTemplateCacheKey === templateCacheKey) {
+    return customTemplateName;
+  }
+
+  customTemplateName = `bibtex-citation-custom-${path
+    .basename(configuredPath, path.extname(configuredPath))
+    .replace(/[^a-z0-9]+/gi, "-")
+    .toLowerCase()}-${Math.round(stat.mtimeMs)}`;
+  config.templates.add(customTemplateName, fs.readFileSync(configuredPath, "utf8"));
+  customTemplateCacheKey = templateCacheKey;
+  return customTemplateName;
 }

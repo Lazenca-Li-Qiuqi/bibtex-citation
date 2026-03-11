@@ -41,7 +41,7 @@ export function getTyporaBasePath(plugin) {
 }
 
 /**
- * 功能：判断当前路径模式下是否应拒绝相对 BibTeX 路径。
+ * 功能：判断当前路径模式下是否应拒绝相对文件路径。
  * 输入：插件实例、用户填写的路径。
  * 输出：布尔值，true 表示当前模式只允许绝对路径。
  */
@@ -53,11 +53,11 @@ export function shouldRejectRelativePath(plugin, filePath) {
 }
 
 /**
- * 功能：按照当前设置把 BibTeX 路径解析为可读取的绝对路径。
+ * 功能：按照当前设置把单个文件路径解析为可读取的绝对路径。
  * 输入：原始路径字符串、插件实例。
  * 输出：解析后的绝对路径；若在当前模式下不允许则返回空字符串。
  */
-export function resolveBibFilePath(rawPath, plugin) {
+export function resolvePathByBase(rawPath, plugin) {
   const trimmedPath = String(rawPath || "").trim();
   if (!trimmedPath) return "";
   if (path.isAbsolute(trimmedPath)) return trimmedPath;
@@ -76,4 +76,22 @@ export function resolveBibFilePath(rawPath, plugin) {
   }
 
   return path.resolve(getTyporaBasePath(plugin), trimmedPath);
+}
+
+/**
+ * 功能：按照当前设置把 BibTeX 路径解析为可读取的绝对路径。
+ * 输入：原始路径字符串、插件实例。
+ * 输出：解析后的绝对路径；若在当前模式下不允许则返回空字符串。
+ */
+export function resolveBibFilePath(rawPath, plugin) {
+  return resolvePathByBase(rawPath, plugin);
+}
+
+/**
+ * 功能：按照当前设置把 CSL 路径解析为可读取的绝对路径。
+ * 输入：原始路径字符串、插件实例。
+ * 输出：解析后的绝对路径；若在当前模式下不允许则返回空字符串。
+ */
+export function resolveCslFilePath(rawPath, plugin) {
+  return resolvePathByBase(rawPath, plugin);
 }

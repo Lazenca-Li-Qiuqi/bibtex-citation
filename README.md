@@ -11,6 +11,7 @@
 ## 功能概览
 
 - 从一个或多个本地 `.bib` 文件检索文献
+- 支持配置单个本地 `.csl` 文件作为引用样式
 - 支持按 `citation key`、标题、作者、期刊、年份等字段搜索
 - 在 Typora 的方括号引用语法中输入 `@query` 触发候选列表
 - 在左侧活动栏提供 BibTeX 面板按钮，可查看当前配置概览、当前文档引用统计并手动刷新缓存
@@ -52,7 +53,7 @@ cd ~/.config/Typora/plugins/plugins/
 git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 ```
 
-这个精简后的插件不需要额外安装依赖，也不需要执行构建步骤。把插件目录放到正确位置后即可。
+将插件目录放到正确位置后，请在插件目录下执行一次 `npm install`。当前项目不需要额外构建步骤。
 
 ### 启用插件
 
@@ -63,7 +64,7 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 
 ## 配置 BibTeX 文件路径
 
-启用插件后，打开插件设置，可以在 `BibTeX Files` 区域逐条维护 `.bib` 文件路径。
+启用插件后，打开插件设置，可以在 `BibTeX Files` 区域逐条维护 `.bib` 文件路径，并在 `CSL File` 区域配置单个 `.csl` 样式路径。
 
 你也可以在设置页顶部通过 `Display Language / 显示语言` 切换插件界面语言。切换后插件会立即更新设置页与侧边栏文案，但不会强制重新读取 `.bib` 文件。
 
@@ -74,6 +75,7 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 3. 点击 `Add BibTeX File` 添加到列表
 4. 如需修改已有路径，直接编辑对应输入框
 5. 如需删除某项，点击该行右侧的 `Remove`
+6. 在 `CSL File` 中填写一个 `.csl` 路径；该项只能配置一个文件
 
 可填写的路径示例：
 
@@ -81,6 +83,7 @@ git clone https://github.com/Lazenca-Liqiuqi/bibtex-citation.git bibtex-citation
 ./references.bib
 ../bib/library.bib
 D:/Literature/shared.bib
+./styles/american-meteorological-society.csl
 ```
 
 当前支持 3 种路径基准模式：
@@ -144,6 +147,7 @@ D:/Literature/shared.bib
 启用 Typora Community Plugin Framework 的活动栏后，左侧会出现一个新的 BibTeX 图标按钮。点击后可打开插件侧边栏面板，用于：
 
 - 查看当前 `Path Base`
+- 查看当前 `CSL File`
 - 查看已配置的 BibTeX 文件数量
 - 查看当前已索引条目数量
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
@@ -152,7 +156,7 @@ D:/Literature/shared.bib
 
 当你修改 `Path Base` 或 BibTeX 文件列表后，侧边栏中的 `Indexed Entries` 会先显示“待刷新”。此时如果你手动点击 `Refresh Cache`，或直接在文档里输入 `[@query` 触发建议检索，插件都会重新读取文献库并把已索引条目数恢复为真实值。
 
-`Render Citations / 渲染引用` 当前只会处理严格合法的 CSL 引用块，也就是整段内容必须完全匹配 `[@key]` 或 `[@key1; @key2]` 这一类形式。比如：
+`Render Citations / 渲染引用` 当前只会处理严格合法的 CSL 引用块，也就是整段内容必须完全匹配 `[@key]` 或 `[@key1; @key2]` 这一类形式；同时需要你先在设置里配置一个可读取的 `.csl` 文件。比如：
 
 ```text
 [@smith2024example]

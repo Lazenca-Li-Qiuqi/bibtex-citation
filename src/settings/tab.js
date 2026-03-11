@@ -187,5 +187,46 @@ export class BibCitationSettingTab extends SettingTab {
     addRow.appendChild(addInput);
     addRow.appendChild(addButton);
     container.appendChild(addRow);
+
+    this.addSetting((s) => {
+      s.addName(t.settings.cslFile.name);
+      s.addDescription(t.settings.cslFile.desc);
+    });
+
+    const cslRow = document.createElement("div");
+    cslRow.className = "bibtex-setting-row";
+
+    const cslInput = document.createElement("input");
+    cslInput.type = "text";
+    cslInput.className = "bibtex-setting-input";
+    cslInput.value = plugin.settings.get("cslFile") || "";
+    cslInput.placeholder = t.settings.cslFile.placeholder;
+    cslInput.addEventListener("change", () => {
+      if (shouldRejectRelativePath(plugin, cslInput.value)) {
+        new Notice(t.absolutePathRequired);
+        cslInput.value = plugin.settings.get("cslFile") || "";
+        return;
+      }
+
+      plugin.settings.set("cslFile", cslInput.value.trim());
+      plugin.sidebarPanel?.render?.({ allowLibraryLoad: false });
+      this.render();
+      new Notice(t.settingsSaved);
+    });
+
+    const cslClearButton = document.createElement("button");
+    cslClearButton.type = "button";
+    cslClearButton.className = "bibtex-setting-remove";
+    cslClearButton.textContent = t.settings.cslFile.clear;
+    cslClearButton.addEventListener("click", () => {
+      plugin.settings.set("cslFile", "");
+      plugin.sidebarPanel?.render?.({ allowLibraryLoad: false });
+      this.render();
+      new Notice(t.settingsSaved);
+    });
+
+    cslRow.appendChild(cslInput);
+    cslRow.appendChild(cslClearButton);
+    container.appendChild(cslRow);
   }
 }

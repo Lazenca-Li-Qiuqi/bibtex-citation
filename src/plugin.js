@@ -3,7 +3,6 @@ const { Plugin } = window[Symbol.for("typora-plugin-core@v2")];
 import { DEFAULT_SETTINGS, DISPLAY_LANGUAGE, PATH_BASE_MODE } from "./constants.js";
 import { createI18n } from "./i18n.js";
 import { BibEntryStore } from "./bibtex/store.js";
-import { renderCitationMarkdown } from "./csl/render.js";
 import { CurrentDocumentState } from "./document/state.js";
 import { parseBibFileList, serializeBibFileList } from "./bibtex/settings.js";
 import { BibCitationSettingTab } from "./settings/tab.js";
@@ -72,14 +71,15 @@ export default class BibCitationPlugin extends Plugin {
    * 输入：无。
    * 输出：返回本次渲染结果与改写统计。
    */
-  renderCurrentDocumentCitations() {
+  async renderCurrentDocumentCitations() {
     const markdown = window.editor?.getMarkdown?.() || "";
     const entries = this.getBibEntries();
-    const locale =
-      this.settings?.get("displayLanguage") === DISPLAY_LANGUAGE.ZH_CN
-        ? "zh-CN"
-        : "en-US";
-    const result = renderCitationMarkdown(markdown, entries, locale);
+    const [{ ensureCslTemplate }, { renderCitationMarkdown }] = await Promise.all([
+      import("./csl/assets.js"),
+      import("./csl/render.js"),
+    ]);
+    const templateName = ensureCslTemplate(this);
+    const result = renderCitationMarkdown(markdown, entries, templateName);
     if (!result.changed) {
       return result;
     }
