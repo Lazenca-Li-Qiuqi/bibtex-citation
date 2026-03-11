@@ -2,9 +2,7 @@ const { I18n } = window[Symbol.for("typora-plugin-core@v2")];
 
 const en = {
   pluginName: "BibTeX Citations",
-  commandInsert: "Insert BibTeX Citation",
   fileNotFound: "BibTeX file not found: ",
-  noFilesConfigured: "Please configure at least one BibTeX file path.",
   loadError: "Failed to load BibTeX files: ",
   settingsSaved: "Settings updated.",
   emptyPathWarning: "Please enter a BibTeX file path first.",
@@ -60,9 +58,7 @@ const en = {
 
 const zhCn = {
   pluginName: "BibTeX 引用",
-  commandInsert: "插入 BibTeX 引用",
   fileNotFound: "未找到 BibTeX 文件：",
-  noFilesConfigured: "请至少配置一个 BibTeX 文件路径。",
   loadError: "加载 BibTeX 文件失败：",
   settingsSaved: "设置已更新。",
   emptyPathWarning: "请先输入 BibTeX 文件路径。",
@@ -84,7 +80,7 @@ const zhCn = {
     duplicateHint: "当 citation key 重复时，会优先采用更靠前配置的文件。",
     citationCountHint:
       "当前文档统计基于方括号引用中的 citation key，同时显示唯一文献数与总出现次数。",
-    citationCountFormat: "唯一 {unique} 条 / 共 {total} 次",
+    citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },
   settings: {
@@ -112,7 +108,7 @@ const zhCn = {
   },
 };
 
-export function createI18n(displayLanguage = "auto") {
+export function createI18n(displayLanguage = "zh-cn") {
   return new I18n({
     userLang: displayLanguage,
     resources: {

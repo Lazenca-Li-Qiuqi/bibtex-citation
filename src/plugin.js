@@ -42,6 +42,16 @@ export default class BibCitationPlugin extends Plugin {
   }
 
   /**
+   * 功能：执行与侧边栏“刷新缓存”按钮一致的刷新流程。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  refreshCacheView() {
+    this.resetCache();
+    this.sidebarPanel?.render?.();
+  }
+
+  /**
    * 功能：获取当前可用于检索与展示的 BibTeX 条目列表。
    * 输入：无。
    * 输出：去重后的文献条目数组。
@@ -79,27 +89,14 @@ export default class BibCitationPlugin extends Plugin {
     this.refreshI18n();
 
     this.registerSettingTab(new BibCitationSettingTab(this));
-    this.register(this.app.workspace.sidebar.addPanel(new BibCitationSidebarPanel(this)));
+    this.sidebarPanel = new BibCitationSidebarPanel(this);
+    this.register(this.app.workspace.sidebar.addPanel(this.sidebarPanel));
 
     this._suggest = null;
     registerSuggestInteractions(this);
 
     const suggest = new BibCitationSuggest(this.app, this);
     this._suggest = suggest;
-    if (typeof this.registerMarkdownSugguest === "function") {
-      this.registerMarkdownSugguest(suggest);
-      return;
-    }
-
-    const unregister = this.app?.workspace?.activeEditor?.suggestion?.register?.(
-      suggest,
-    );
-    if (typeof unregister === "function") {
-      this.register(unregister);
-    } else {
-      console.warn(
-        "[BibTeX Citations] Failed to register markdown suggest via plugin core.",
-      );
-    }
+    this.registerMarkdownSugguest(suggest);
   }
 }

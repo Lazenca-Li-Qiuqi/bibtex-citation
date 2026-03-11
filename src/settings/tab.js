@@ -54,6 +54,7 @@ export class BibCitationSettingTab extends SettingTab {
           const value = $(event.target).val();
           plugin.settings.set("displayLanguage", value);
           plugin.refreshI18n();
+          plugin.refreshCacheView();
           this.render();
           new Notice(plugin.i18n.t.settingsSaved);
         });

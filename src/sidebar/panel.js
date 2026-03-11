@@ -81,8 +81,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
    * 输出：无返回值。
    */
   handleRefresh() {
-    this.plugin.resetCache();
-    this.render();
+    this.plugin.refreshCacheView();
   }
 }
 
