@@ -41,6 +41,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
     const t = this.plugin.i18n.t.sidebar;
     const paths = parseBibFileList(this.plugin.settings.get("bibFiles"));
     const pathBase = this.plugin.settings.get("pathBase");
+    const citedCount = getCurrentDocumentCitationCount();
 
     let entryCount = 0;
     let loadError = "";
@@ -57,6 +58,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
         [t.pathBaseLabel, getPathBaseLabel(pathBase, this.plugin.i18n.t.settings.pathBase)],
         [t.configuredFilesLabel, String(paths.length)],
         [t.indexedEntriesLabel, loadError ? t.unavailable : String(entryCount)],
+        [t.citedEntriesLabel, formatCitationCount(t.citationCountFormat, citedCount)],
       ]),
       createActions([
         [t.refreshButton, () => this.handleRefresh()],
@@ -66,6 +68,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       paths.length ? createPathList(paths, t.filesTitle) : createEmpty(t.empty),
       createFootnote(t.triggerHint),
       createFootnote(t.duplicateHint),
+      createFootnote(t.citationCountHint),
     ].filter(Boolean);
 
     this.containerEl.innerHTML = "";
@@ -196,4 +199,34 @@ function getPathBaseLabel(pathBase, labels) {
     default:
       return labels.markdown;
   }
+}
+
+function getCurrentDocumentCitationCount() {
+  const markdown = window.editor?.getMarkdown?.();
+  if (!markdown) {
+    return { unique: 0, total: 0 };
+  }
+
+  const keys = new Set();
+  let total = 0;
+  const bracketPattern = /\[[\s\S]*?\]/g;
+  const citationPattern = /@([^\s\],;]+)/g;
+
+  for (const block of markdown.match(bracketPattern) || []) {
+    let match = citationPattern.exec(block);
+    while (match) {
+      keys.add(match[1]);
+      total += 1;
+      match = citationPattern.exec(block);
+    }
+    citationPattern.lastIndex = 0;
+  }
+
+  return { unique: keys.size, total };
+}
+
+function formatCitationCount(template, counts) {
+  return String(template)
+    .replace("{unique}", String(counts.unique))
+    .replace("{total}", String(counts.total));
 }

@@ -19,6 +19,7 @@ export const i18n = new I18n({
         pathBaseLabel: "Path Base",
         configuredFilesLabel: "Configured Files",
         indexedEntriesLabel: "Indexed Entries",
+        citedEntriesLabel: "Cited In Current Doc",
         refreshButton: "Refresh Cache",
         openSettingsButton: "Open Settings",
         empty: "No BibTeX files are configured yet.",
@@ -28,6 +29,9 @@ export const i18n = new I18n({
           "Type [@query] in the editor to search citations from the configured files.",
         duplicateHint:
           "When citation keys are duplicated, the earlier configured file wins.",
+        citationCountHint:
+          "The current-document count shows both unique citation keys and total citation occurrences found in bracket citations.",
+        citationCountFormat: "{unique} unique / {total} total",
         filesTitle: "BibTeX Files",
       },
       settings: {

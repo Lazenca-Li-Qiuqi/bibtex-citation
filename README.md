@@ -6,14 +6,14 @@
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.1`。
+当前文档对应发布版本：`0.2.2`。
 
 ## 功能概览
 
 - 从一个或多个本地 `.bib` 文件检索文献
 - 支持按 `citation key`、标题、作者、期刊、年份等字段搜索
 - 在 Typora 的方括号引用语法中输入 `@query` 触发候选列表
-- 在左侧活动栏提供 BibTeX 面板按钮，可查看当前配置概览并手动刷新缓存
+- 在左侧活动栏提供 BibTeX 面板按钮，可查看当前配置概览、当前文档引用统计并手动刷新缓存
 - 多个 BibTeX 路径支持逐条添加、编辑、删除
 - 相对路径支持多种解析基准模式
 - 当多个 BibTeX 文件存在相同 `citation key` 时，以配置列表中更靠前的文件为准
@@ -142,6 +142,7 @@ D:/Literature/shared.bib
 - 查看当前 `Path Base`
 - 查看已配置的 BibTeX 文件数量
 - 查看当前已索引条目数量
+- 查看当前文档中的唯一引用条数与总引用次数
 - 手动执行 `Refresh Cache`
 - 快速打开插件设置
 
@@ -213,6 +214,6 @@ secondary.bib
 
 - 插件 ID：`bibtex-citation`
 - 插件名称：`BibTeX Citations`
-- 当前版本：`0.2.1`
+- 当前版本：`0.2.2`
 - 支持平台：Windows、Linux、macOS
 - 本仓库和本地插件目录都应使用名称 `bibtex-citation`
