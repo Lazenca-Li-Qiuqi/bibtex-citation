@@ -2,32 +2,33 @@
 
 ## 日期
 
-- 2026-03-09
+- 2026-03-11
 
 ## 已完成
 
-- 连续完善 Typora 候选列表交互，确认候选项维持“两行展示 + 年份标签 + 双行截断”的当前样式方案
-- 修复鼠标点击候选项无效的问题，改为通过文档级捕获阶段 `mousedown` 兜底插入引用
-- 修复点击候选项后偶发自动换行的问题，并处理“完整 key 仍显示候选栏”这一边缘场景
-- 保留“候选栏打开时按回车默认插入第一条建议”的兜底行为
-- 将候选触发规则从正文裸 `@query` 收敛回方括号引用语法，只在未闭合的 `[` 中匹配 `@query`
-- 尝试过“展开时默认真选中第一项”的多种方案与最小运行时探针，最终决定放弃该功能并撤回相关实现
+- 将原本集中在 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 的插件逻辑拆分到 `src/` 模块，入口文件改为仅做默认导出转发
+- 新增 `src/bibtex/`、`src/suggest/`、`src/settings/`、`src/utils/` 等目录，分别承载 BibTeX 数据层、建议层、设置页与通用工具
+- 将 BibTeX 解析、路径解析、缓存读取、建议渲染、键鼠交互兜底和设置页管理拆成独立模块，并保持现有行为不变
+- 为新模块的对外函数与类补充简体中文注释，方便后续继续维护与继续拆分
+- 更新项目记忆 [`AGENTS.md`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\AGENTS.md)，同步新的模块结构、常用命令与排查提示
 
 ## 主要方法与工具
 
-- `rg -n "findQuery|triggerText|renderSuggestion|handleSuggestEnterKey|handleSuggestPointerDown|typ-suggestion|autoComplete" main.js style.css C:\\Users\\pc\\.typora\\community-plugins\\2.5.54\\core.js`
+- `Get-Content -Raw main.js`
+- `Get-Content -Raw C:\Users\pc\.typora\community-plugins\2.5.54\core.js`
 - `node --check main.js`
+- `Get-ChildItem -Recurse .\src -Filter *.js | ForEach-Object { node --check $_.FullName }`
+- `npm run build`
 - `apply_patch`
-- 对照 Typora Community Plugin Core 中 `EditorSuggest` / `autoComplete` 的包装实现做静态排查
 
 ## 当前任务
 
-- 候选栏交互目前以稳定性优先：点击可选、回车可插入、定位不越界、触发规则回到方括号引用场景
-- “默认真选中第一项” 已明确放弃，当前不再作为活跃任务
-- 这轮仍未补自动化测试，真实验证依赖 Typora 内手工回归
+- 项目代码结构已从单文件改为模块化，但尚未在 Typora 真实环境中做这一轮手工回归
+- 入口、模块导入链与本地语法检查已通过，后续主要风险点转为宿主加载兼容性与真实交互验证
+- 当前仍缺少自动化测试脚本，验证工作主要依赖 Typora 内手工检查
 
 ## 下次继续
 
-- 在 Typora 中重点回归 `[@key]` 与 `[@a; @b]` 这类多文献引用路径，确认第二个及后续 `@query` 的建议与插入体验
-- 如需继续改进体验，优先考虑多引文编辑流程和候选排序，而不是恢复默认选中第一项
-- 若准备下一次发布，再统一整理 `README.md` 中对当前方括号触发规则的说明
+- 在 Typora 中验证模块化重构后的插件是否能正常加载，并回归 `[@key]`、`[@a; @b]` 等引用场景
+- 若行为稳定，可继续把 [`src/plugin.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\src\plugin.js) 中的装配逻辑再细化
+- 视需要补最小测试骨架或手工回归清单，降低后续重构风险
