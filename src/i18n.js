@@ -11,6 +11,25 @@ export const i18n = new I18n({
       emptyPathWarning: "Please enter a BibTeX file path first.",
       absolutePathRequired:
         "This path mode only accepts absolute BibTeX file paths.",
+      sidebar: {
+        title: "BibTeX Citations",
+        heading: "BibTeX Citations",
+        description:
+          "Review the current BibTeX configuration, indexed entries, and quick actions.",
+        pathBaseLabel: "Path Base",
+        configuredFilesLabel: "Configured Files",
+        indexedEntriesLabel: "Indexed Entries",
+        refreshButton: "Refresh Cache",
+        openSettingsButton: "Open Settings",
+        empty: "No BibTeX files are configured yet.",
+        unavailable: "Unavailable",
+        loadErrorPrefix: "Index refresh failed: ",
+        triggerHint:
+          "Type [@query] in the editor to search citations from the configured files.",
+        duplicateHint:
+          "When citation keys are duplicated, the earlier configured file wins.",
+        filesTitle: "BibTeX Files",
+      },
       settings: {
         pathBase: {
           name: "Path Base",

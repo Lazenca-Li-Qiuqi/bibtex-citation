@@ -187,3 +187,139 @@
 .theme-dark .bibtex-setting-empty {
   color: #999;
 }
+
+.bibtex-sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 14px 18px;
+  color: #222;
+}
+
+.bibtex-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bibtex-sidebar-title,
+.bibtex-sidebar-subtitle {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.bibtex-sidebar-title {
+  font-size: 16px;
+}
+
+.bibtex-sidebar-subtitle {
+  font-size: 13px;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bibtex-sidebar-description,
+.bibtex-sidebar-empty,
+.bibtex-sidebar-footnote,
+.bibtex-sidebar-error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bibtex-sidebar-description,
+.bibtex-sidebar-empty,
+.bibtex-sidebar-footnote {
+  color: #666;
+}
+
+.bibtex-sidebar-error {
+  color: #b42318;
+}
+
+.bibtex-sidebar-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+.bibtex-sidebar-summary-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.bibtex-sidebar-summary-row dt,
+.bibtex-sidebar-summary-row dd {
+  margin: 0;
+}
+
+.bibtex-sidebar-summary-row dt {
+  color: #666;
+  font-size: 12px;
+}
+
+.bibtex-sidebar-summary-row dd {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.bibtex-sidebar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bibtex-sidebar-button {
+  min-width: 0;
+}
+
+.bibtex-sidebar-path-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bibtex-sidebar-path-item {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #1f2937;
+  overflow-wrap: anywhere;
+}
+
+.theme-dark .bibtex-sidebar-panel {
+  color: #f3f4f6;
+}
+
+.theme-dark .bibtex-sidebar-subtitle,
+.theme-dark .bibtex-sidebar-summary-row dd,
+.theme-dark .bibtex-sidebar-path-item {
+  color: #e5e7eb;
+}
+
+.theme-dark .bibtex-sidebar-description,
+.theme-dark .bibtex-sidebar-empty,
+.theme-dark .bibtex-sidebar-footnote,
+.theme-dark .bibtex-sidebar-summary-row dt {
+  color: #9ca3af;
+}
+
+.theme-dark .bibtex-sidebar-summary-row {
+  border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+.theme-dark .bibtex-sidebar-error {
+  color: #fda29b;
+}

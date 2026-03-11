@@ -5,6 +5,7 @@ import { i18n } from "./i18n.js";
 import { BibEntryStore } from "./bibtex/store.js";
 import { parseBibFileList, serializeBibFileList } from "./bibtex/settings.js";
 import { BibCitationSettingTab } from "./settings/tab.js";
+import { BibCitationSidebarPanel } from "./sidebar/panel.js";
 import { BibCitationSuggest } from "./suggest/suggest.js";
 import { registerSuggestInteractions } from "./suggest/interactions.js";
 
@@ -62,6 +63,7 @@ export default class BibCitationPlugin extends Plugin {
     );
 
     this.registerSettingTab(new BibCitationSettingTab(this));
+    this.register(this.app.workspace.sidebar.addPanel(new BibCitationSidebarPanel(this)));
 
     this._suggest = null;
     registerSuggestInteractions(this);
