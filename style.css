@@ -1,6 +1,6 @@
 .auto-suggest-container {
-  width: min(42rem, 80vw) !important;
-  max-width: min(42rem, 80vw) !important;
+  width: min(35.7rem, 68vw) !important;
+  max-width: min(35.7rem, 68vw) !important;
   box-sizing: border-box;
 }
 
@@ -16,8 +16,8 @@
   padding: 9px 12px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
-  width: min(42rem, 80vw);
-  max-width: min(42rem, 80vw);
+  width: min(35.7rem, 68vw);
+  max-width: min(35.7rem, 68vw);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -42,11 +42,31 @@
 .bibtex-cite-meta {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 6px;
   font-size: 12px;
   color: #666;
   line-height: 1.35;
   overflow: hidden;
+}
+
+.bibtex-cite-meta-left,
+.bibtex-cite-meta-right {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bibtex-cite-meta-left {
+  flex: 1 1 auto;
+}
+
+.bibtex-cite-meta-right {
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  text-align: right;
+  padding-left: 4px;
 }
 
 .bibtex-cite-year {
@@ -63,12 +83,31 @@
 .bibtex-cite-authors {
   min-width: 0;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+}
+
+.bibtex-cite-doi {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bibtex-cite-journal {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.35;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.bibtex-cite-doi {
+  color: #7a7a7a;
+  font-family: Consolas, "SFMono-Regular", Menlo, Monaco, monospace;
+  font-size: 11px;
 }
 
 .bibtex-cite-title {
@@ -96,6 +135,14 @@
 
 .theme-dark .bibtex-cite-meta {
   color: #999;
+}
+
+.theme-dark .bibtex-cite-journal {
+  color: #cfcfcf;
+}
+
+.theme-dark .bibtex-cite-doi {
+  color: #a8a8a8;
 }
 
 .theme-dark .bibtex-cite-year {

@@ -6,7 +6,7 @@
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.0`。
+当前文档对应发布版本：`0.2.1`。
 
 ## 功能概览
 
@@ -202,6 +202,6 @@ secondary.bib
 
 - 插件 ID：`bibtex-citation`
 - 插件名称：`BibTeX Citations`
-- 当前版本：`0.2.0`
+- 当前版本：`0.2.1`
 - 支持平台：Windows、Linux、macOS
 - 本仓库和本地插件目录都应使用名称 `bibtex-citation`

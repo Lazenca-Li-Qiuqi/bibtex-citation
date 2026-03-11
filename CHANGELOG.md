@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.1 - 2026-03-11
+
+- 调整候选项作者显示为更接近 author-date 的样式：单作者显示单作者、双作者使用 `and`、三位及以上显示首位作者加 `et al.`
+- 扩展 BibTeX 字段解析与展示，增加 DOI 信息，并把候选项元信息布局调整为“年份与作者 + DOI + 第三行期刊名”
+- 收紧候选列表整体宽度与元信息间距，并微调作者字重，提升信息密度与视觉层级
+
 ## 0.2.0 - 2026-03-11
 
 - 将插件从单文件结构重构为模块化 `src/` 布局，保留轻量入口 [`main.js`](C:\Users\pc\.typora\community-plugins\plugins\bibtex-citation\main.js) 并把核心逻辑迁移到 `src/plugin.js`

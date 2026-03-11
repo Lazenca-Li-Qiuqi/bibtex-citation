@@ -47,6 +47,7 @@ export function parseBibEntries(content, sourcePath) {
       authors: fields.author || "",
       year: fields.year || fields.date || "",
       journal: fields.journal || fields.journaltitle || fields.booktitle || "",
+      doi: fields.doi || "",
       publisher: fields.publisher || "",
       sourcePath,
       searchText: normalizeWhitespace(
@@ -59,6 +60,7 @@ export function parseBibEntries(content, sourcePath) {
           fields.journal,
           fields.journaltitle,
           fields.booktitle,
+          fields.doi,
           fields.publisher,
         ].join(" "),
       ).toLowerCase(),
