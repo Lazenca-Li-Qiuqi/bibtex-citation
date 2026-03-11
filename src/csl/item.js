@@ -9,10 +9,14 @@ export function toCslItem(entry) {
     type: mapBibTypeToCslType(entry.type),
     title: entry.title || "",
     author: parseCslAuthors(entry.authors),
+    editor: parseCslAuthors(entry.editors),
     issued: parseIssued(entry.year),
-    "container-title": entry.journal || "",
+    "container-title": resolveContainerTitle(entry),
     DOI: entry.doi || "",
-    publisher: entry.publisher || "",
+    publisher: entry.publisher || entry.institution || "",
+    volume: entry.volume || undefined,
+    issue: entry.issue || undefined,
+    page: entry.pages || undefined,
   };
 }
 
@@ -67,6 +71,19 @@ function parseCslAuthors(rawAuthors) {
     .filter(Boolean)
     .map((author) => parseSingleAuthor(author))
     .filter(Boolean);
+}
+
+function resolveContainerTitle(entry) {
+  if (!entry) {
+    return "";
+  }
+
+  const type = String(entry.type || "").toLowerCase();
+  if (type === "inproceedings" || type === "conference" || type === "incollection" || type === "inbook") {
+    return entry.booktitle || entry.journal || "";
+  }
+
+  return entry.journal || entry.booktitle || "";
 }
 
 function parseSingleAuthor(author) {

@@ -1,0 +1,74 @@
+import { extractClosedBracketRanges } from "../document/brackets.js";
+
+/**
+ * 功能：解析严格合法的 CSL 引用块，仅接受 `[@key]` 或 `[@a; @b]` 形式。
+ * 输入：单个闭合方括号块文本。
+ * 输出：返回 citation key 数组；若不符合严格语法则返回 null。
+ */
+export function parseStrictCitationKeys(blockText) {
+  if (!blockText.startsWith("[") || !blockText.endsWith("]")) {
+    return null;
+  }
+
+  const inner = blockText.slice(1, -1).trim();
+  if (!inner || !/^@([^\s\],;]+)(\s*;\s*@([^\s\],;]+))*$/.test(inner)) {
+    return null;
+  }
+
+  return inner
+    .split(/\s*;\s*/)
+    .map((segment) => segment.replace(/^@/, "").trim())
+    .filter(Boolean);
+}
+
+/**
+ * 功能：从闭合方括号范围中筛选所有严格合法且 key 可解析的 citation block。
+ * 输入：闭合方括号范围数组、用于校验 key 是否存在的函数。
+ * 输出：返回可安全参与 CSL 渲染的引用块数组。
+ */
+export function collectValidCitationBlocksFromRanges(ranges, isKnownKey) {
+  return ranges
+    .map((range) => {
+      const keys = parseStrictCitationKeys(range.text);
+      if (!keys || !keys.every((key) => isKnownKey(key))) {
+        return null;
+      }
+
+      return {
+        range,
+        keys,
+      };
+    })
+    .filter(Boolean);
+}
+
+/**
+ * 功能：直接从 Markdown 中提取严格合法且 key 可解析的 citation block。
+ * 输入：Markdown 文本、用于校验 key 是否存在的函数。
+ * 输出：返回可安全参与 CSL 渲染的引用块数组。
+ */
+export function collectValidCitationBlocksFromMarkdown(markdown, isKnownKey) {
+  const ranges = extractClosedBracketRanges(String(markdown || ""));
+  return collectValidCitationBlocksFromRanges(ranges, isKnownKey);
+}
+
+/**
+ * 功能：按首次出现顺序从合法 citation block 中提取唯一 key 列表。
+ * 输入：合法 citation block 数组。
+ * 输出：去重后且保留首次出现顺序的 key 数组。
+ */
+export function collectUniqueCitationKeys(validCitationBlocks) {
+  const keys = [];
+  const seen = new Set();
+
+  for (const block of validCitationBlocks) {
+    for (const key of block.keys) {
+      if (!seen.has(key)) {
+        seen.add(key);
+        keys.push(key);
+      }
+    }
+  }
+
+  return keys;
+}

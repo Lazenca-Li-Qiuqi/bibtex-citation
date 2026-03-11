@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.7 - 2026-03-11
+
+- 增加 `Insert Bibliography / 插入参考文献`，可根据当前文档中仍保留 `@key` 的严格合法 citation block 生成或更新文末受控参考文献块
+- 为 bibliography 补齐第一批关键 CSL 映射字段，修复会议论文与章节类条目缺失 `booktitle`、`editor`、卷期页后只剩题名的问题
+- 将所有 CSL 文档改写操作统一为“遇到非法 citation key 直接报错并停止”，不再对混合合法/非法 key 做跳过式容错
+- 更新 README、AGENTS 与 LAST_RUN，记录 bibliography MVP、受控参考文献块与后续“保留原始 key”路线
 ## 0.2.6 - 2026-03-11
 
 - 增加单个外部 `CSL File` 设置，复用 `Path Base` 的路径解析模式，并在侧边栏中显示当前 CSL 配置

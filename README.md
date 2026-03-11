@@ -6,7 +6,7 @@
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.6`。
+当前文档对应发布版本：`0.2.7`。
 
 ## 功能概览
 
@@ -16,6 +16,7 @@
 - 在 Typora 的方括号引用语法中输入 `@query` 触发候选列表
 - 在左侧活动栏提供 BibTeX 面板按钮，可查看当前配置概览、当前文档引用统计并手动刷新缓存
 - 支持把当前文档中严格合法的 `[@key]` / `[@a; @b]` 引用块渲染为文中引用
+- 支持根据当前文档中仍保留 `@key` 的合法引用块插入或更新参考文献表
 - 支持在插件设置中切换 `English` 与 `简体中文` 两种界面语言
 - 多个 BibTeX 路径支持逐条添加、编辑、删除
 - 相对路径支持多种解析基准模式
@@ -156,6 +157,7 @@ D:/Literature/shared.bib
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
 - 手动执行 `Refresh Cache`
 - 手动执行 `Render Citations / 渲染引用`
+- 手动执行 `Insert Bibliography / 插入参考文献`
 
 当你修改 `Path Base` 或 BibTeX 文件列表后，侧边栏中的 `Indexed Entries` 会先显示“待刷新”。此时如果你手动点击 `Refresh Cache`，或直接在文档里输入 `[@query` 触发建议检索，插件都会重新读取文献库并把已索引条目数恢复为真实值。
 
@@ -183,6 +185,23 @@ D:/Literature/shared.bib
 
 而像 `[see @smith2024example]`、`[@smith2024example, p. 3]`、`[smith2024example]` 这类包含说明文字、locator，或本身不是严格 CSL 引用块的片段，当前不会自动改写。
 
+如果当前文档任意闭合引用块中包含未收录于文献库的 citation key，那么“渲染引用”和“插入参考文献”都会直接报错并停止，不再跳过非法块后继续处理其他内容。
+
+`Insert Bibliography / 插入参考文献` 会从当前文档中仍保留 `@key` 的严格合法 citation block 提取 key，按当前配置的 `.csl` 样式在文档末尾追加或更新一个受控参考文献块。受控块使用 HTML 注释包裹，便于后续重复执行时直接更新，例如：
+
+```html
+<!-- bibtex-citation:bibliography:start -->
+## References
+
+<div class="csl-bib-body">...</div>
+<!-- bibtex-citation:bibliography:end -->
+```
+
+注意：
+
+- 这一步依赖文档里还保留原始 `[@key]`；如果你已经先执行过 `Render Citations` 把 `@key` 替换成正文引用文本，那么当前版本将无法再从文档中反推出参考文献 key
+- 因此在当前版本中，更推荐先插入参考文献，再决定是否执行“渲染引用”
+
 ## 当前支持的 CSL 特性
 
 下表描述的是当前插件在“`Render Citations / 渲染引用`”这条链路上，对 CSL 文内引用相关能力的支持范围。
@@ -201,13 +220,13 @@ D:/Literature/shared.bib
 | locator，如 `[@key, p. 3]` | 暂不支持 | 页码、章节号等 locator 目前不会参与渲染 |
 | suffix / 更复杂 citation cluster 语法 | 暂不支持 | 当前仅支持严格的 `[@a; @b]` 形式 |
 | 脚注 / 尾注 note-style citation | 暂不支持 | 当前实现是原地替换正文，不会自动创建脚注结构 |
-| 自动生成 bibliography | 暂不支持 | 当前仓库只支持文内 citation 渲染，参考文献表功能还未接入 |
+| 插入或更新 bibliography | 已支持 | 会在文档末尾写入一个受控参考文献块，前提是文档里仍保留合法 `@key` 引用块 |
 
 补充说明：
 
 - 当前渲染输出优先使用 CSL 的 `html` 结果，因此某些样式可能会写入 HTML 实体，例如 `&#38;`
 - 对大多数普通 author-date / numeric 样式，这不会影响 Typora 中的显示效果
-- 当前只处理严格闭合且 key 全部存在于文献库中的 citation block；包含未知 key 的块会保持原样
+- 当前只处理严格闭合且 key 全部存在于文献库中的 citation block；如果文档中任意闭合引用块包含未知 key，相关 CSL 操作会直接报错并停止
 
 ## 相对路径解析规则
 

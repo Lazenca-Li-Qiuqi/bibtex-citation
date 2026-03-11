@@ -1,6 +1,7 @@
 import { toCslItem } from "./item.js";
 import { getPluginRequire } from "./runtime.js";
 import { extractClosedBracketRanges } from "../document/brackets.js";
+import { collectValidCitationBlocksFromRanges } from "./citation-blocks.js";
 
 const pluginRequire = getPluginRequire();
 const { Cite } = pluginRequire("@citation-js/core");
@@ -68,41 +69,13 @@ function createRenderResult(markdown, changed = false, renderedBlocks = 0, rende
   };
 }
 
-function parseStrictCitationKeys(blockText) {
-  if (!blockText.startsWith("[") || !blockText.endsWith("]")) {
-    return null;
-  }
-
-  const inner = blockText.slice(1, -1).trim();
-  if (!inner || !/^@([^\s\],;]+)(\s*;\s*@([^\s\],;]+))*$/.test(inner)) {
-    return null;
-  }
-
-  return inner
-    .split(/\s*;\s*/)
-    .map((segment) => segment.replace(/^@/, "").trim())
-    .filter(Boolean);
-}
-
 /**
  * 功能：收集当前文档中可安全渲染的合法引用块。
  * 输入：闭合方括号范围列表、BibTeX 条目映射。
  * 输出：仅包含所有 key 都存在于文献库中的引用块描述数组。
  */
 function collectValidCitationBlocks(ranges, entryMap) {
-  return ranges
-    .map((range) => {
-      const keys = parseStrictCitationKeys(range.text);
-      if (!keys || !keys.every((key) => entryMap.has(key))) {
-        return null;
-      }
-
-      return {
-        range,
-        keys,
-      };
-    })
-    .filter(Boolean);
+  return collectValidCitationBlocksFromRanges(ranges, (key) => entryMap.has(key));
 }
 
 /**

@@ -76,6 +76,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       createActions([
         [t.refreshButton, () => this.handleRefresh()],
         [t.renderButton, () => this.handleRenderCitations()],
+        [t.insertBibliographyButton, () => this.handleInsertBibliography()],
       ]),
       loadError ? createError(t.loadErrorPrefix + loadError) : null,
       citationState.error ? createError(t.invalidCitationPrefix + citationState.error) : null,
@@ -84,6 +85,7 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       createFootnote(t.duplicateHint),
       createFootnote(t.citationCountHint),
       createFootnote(t.renderHint),
+      createFootnote(t.insertBibliographyHint),
     ].filter(Boolean);
 
     this.containerEl.innerHTML = "";
@@ -120,6 +122,31 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       );
     } catch (error) {
       new Notice(this.plugin.i18n.t.sidebar.renderErrorPrefix + (error?.message || String(error)));
+    }
+  }
+
+  /**
+   * 功能：根据当前文档中的合法 citation key 生成或更新参考文献块。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  async handleInsertBibliography() {
+    try {
+      const result = await this.plugin.insertCurrentDocumentBibliography();
+      if (!result.changed) {
+        new Notice(this.plugin.i18n.t.sidebar.insertBibliographyNoChanges);
+        return;
+      }
+
+      new Notice(
+        this.plugin.i18n.t.sidebar.insertBibliographySuccess
+          .replace("{keys}", String(result.keyCount)),
+      );
+    } catch (error) {
+      new Notice(
+        this.plugin.i18n.t.sidebar.insertBibliographyErrorPrefix +
+          (error?.message || String(error)),
+      );
     }
   }
 }

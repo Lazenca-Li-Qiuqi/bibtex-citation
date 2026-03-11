@@ -72,6 +72,7 @@ export default class BibCitationPlugin extends Plugin {
    * 输出：返回本次渲染结果与改写统计。
    */
   async renderCurrentDocumentCitations() {
+    this.ensureNoInvalidCitationKeysForCslAction();
     const markdown = window.editor?.getMarkdown?.() || "";
     const entries = this.getBibEntries();
     const [{ ensureCslTemplate }, { renderCitationMarkdown }] = await Promise.all([
@@ -93,6 +94,57 @@ export default class BibCitationPlugin extends Plugin {
     this.resetDocumentState();
     this.sidebarPanel?.render?.();
     return result;
+  }
+
+  /**
+   * 功能：根据当前文档中的合法 citation key 生成或更新参考文献块。
+   * 输入：无。
+   * 输出：返回本次插入结果与引用 key 统计。
+   */
+  async insertCurrentDocumentBibliography() {
+    this.ensureNoInvalidCitationKeysForCslAction();
+    const markdown = window.editor?.getMarkdown?.() || "";
+    const entries = this.getBibEntries();
+    const [{ ensureCslTemplate }, { insertBibliographyMarkdown }] = await Promise.all([
+      import("./csl/assets.js"),
+      import("./csl/bibliography.js"),
+    ]);
+    const templateName = ensureCslTemplate(this);
+    const result = insertBibliographyMarkdown(
+      markdown,
+      entries,
+      templateName,
+      this.i18n.t.sidebar.bibliographyHeading,
+    );
+    if (!result.changed) {
+      return result;
+    }
+
+    const reloadContent = window.File?.reloadContent;
+    if (typeof reloadContent !== "function") {
+      throw new Error(this.i18n.t.sidebar.renderReloadUnavailable);
+    }
+
+    reloadContent(result.markdown, false, true, false, true);
+    this.resetDocumentState();
+    this.sidebarPanel?.render?.();
+    return result;
+  }
+
+  /**
+   * 功能：在执行 CSL 相关文档改写前，阻止包含非法 citation key 的文档继续处理。
+   * 输入：无。
+   * 输出：若发现非法 citation key，则抛出错误；否则无返回值。
+   */
+  ensureNoInvalidCitationKeysForCslAction() {
+    const citationState = this.getCurrentDocumentCitationState();
+    if (!citationState.error) {
+      return;
+    }
+
+    throw new Error(
+      this.i18n.t.sidebar.invalidCitationPrefix + citationState.error,
+    );
   }
 
   /**
