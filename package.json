@@ -7,10 +7,11 @@
   "scripts": {
     "build": "echo BibTeX-only plugin does not require a build step"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "@citation-js/core": "^0.7.21",
+    "@citation-js/plugin-csl": "^0.7.22"
+  },
   "engines": {
     "node": ">=22"
   }
 }
-

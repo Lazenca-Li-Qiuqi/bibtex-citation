@@ -1,4 +1,4 @@
-const { SidebarPanel } = window[Symbol.for("typora-plugin-core@v2")];
+const { Notice, SidebarPanel } = window[Symbol.for("typora-plugin-core@v2")];
 
 import { PATH_BASE_MODE } from "../constants.js";
 import { parseBibFileList } from "../bibtex/settings.js";
@@ -71,13 +71,17 @@ export class BibCitationSidebarPanel extends SidebarPanel {
             : formatCitationCount(t.citationCountFormat, citationState.counts),
         ],
       ]),
-      createActions([[t.refreshButton, () => this.handleRefresh()]]),
+      createActions([
+        [t.refreshButton, () => this.handleRefresh()],
+        [t.renderButton, () => this.handleRenderCitations()],
+      ]),
       loadError ? createError(t.loadErrorPrefix + loadError) : null,
       citationState.error ? createError(t.invalidCitationPrefix + citationState.error) : null,
       paths.length ? createPathList(paths, t.filesTitle) : createEmpty(t.empty),
       createFootnote(t.triggerHint),
       createFootnote(t.duplicateHint),
       createFootnote(t.citationCountHint),
+      createFootnote(t.renderHint),
     ].filter(Boolean);
 
     this.containerEl.innerHTML = "";
@@ -92,6 +96,29 @@ export class BibCitationSidebarPanel extends SidebarPanel {
    */
   handleRefresh() {
     this.plugin.reloadLibraryNow();
+  }
+
+  /**
+   * 功能：将当前文档中的严格合法 CSL 引用块渲染为文中引用文本。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  handleRenderCitations() {
+    try {
+      const result = this.plugin.renderCurrentDocumentCitations();
+      if (!result.changed) {
+        new Notice(this.plugin.i18n.t.sidebar.renderNoChanges);
+        return;
+      }
+
+      new Notice(
+        this.plugin.i18n.t.sidebar.renderSuccess
+          .replace("{blocks}", String(result.renderedBlocks))
+          .replace("{keys}", String(result.renderedKeys)),
+      );
+    } catch (error) {
+      new Notice(this.plugin.i18n.t.sidebar.renderErrorPrefix + (error?.message || String(error)));
+    }
   }
 }
 

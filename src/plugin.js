@@ -3,6 +3,7 @@ const { Plugin } = window[Symbol.for("typora-plugin-core@v2")];
 import { DEFAULT_SETTINGS, DISPLAY_LANGUAGE, PATH_BASE_MODE } from "./constants.js";
 import { createI18n } from "./i18n.js";
 import { BibEntryStore } from "./bibtex/store.js";
+import { renderCitationMarkdown } from "./csl/render.js";
 import { CurrentDocumentState } from "./document/state.js";
 import { parseBibFileList, serializeBibFileList } from "./bibtex/settings.js";
 import { BibCitationSettingTab } from "./settings/tab.js";
@@ -64,6 +65,34 @@ export default class BibCitationPlugin extends Plugin {
     const markdown = window.editor?.getMarkdown?.() || "";
     const validCitationKeys = this.bibStore.getEntryKeySet();
     return this.documentState.getCitationState(markdown, validCitationKeys);
+  }
+
+  /**
+   * 功能：把当前文档中严格合法的 `[@key]` / `[@a; @b]` 引用块渲染为 CSL 文中引用。
+   * 输入：无。
+   * 输出：返回本次渲染结果与改写统计。
+   */
+  renderCurrentDocumentCitations() {
+    const markdown = window.editor?.getMarkdown?.() || "";
+    const entries = this.getBibEntries();
+    const locale =
+      this.settings?.get("displayLanguage") === DISPLAY_LANGUAGE.ZH_CN
+        ? "zh-CN"
+        : "en-US";
+    const result = renderCitationMarkdown(markdown, entries, locale);
+    if (!result.changed) {
+      return result;
+    }
+
+    const reloadContent = window.File?.reloadContent;
+    if (typeof reloadContent !== "function") {
+      throw new Error(this.i18n.t.sidebar.renderReloadUnavailable);
+    }
+
+    reloadContent(result.markdown, false, true, false, true);
+    this.resetDocumentState();
+    this.sidebarPanel?.render?.();
+    return result;
   }
 
   /**

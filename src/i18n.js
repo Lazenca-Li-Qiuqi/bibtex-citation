@@ -18,16 +18,24 @@ const en = {
     indexedEntriesLabel: "Indexed Entries",
     citedEntriesLabel: "Cited In Current Doc",
     refreshButton: "Refresh Cache",
+    renderButton: "Render Citations",
     empty: "No BibTeX files are configured yet.",
     unavailable: "Refresh needed",
     loadErrorPrefix: "Index refresh failed: ",
     invalidCitationPrefix: "Current document contains an unknown citation key: ",
+    renderErrorPrefix: "Citation rendering failed: ",
+    renderReloadUnavailable: "The current Typora runtime does not expose a document reload API.",
+    renderNoChanges:
+      "No strictly valid CSL citation blocks were found. This action currently only processes patterns like [@key] or [@a; @b].",
+    renderSuccess: "Rendered {blocks} citation blocks ({keys} keys).",
     triggerHint:
       "Type [@query] in the editor to search citations from the configured files.",
     duplicateHint:
       "When citation keys are duplicated, the earlier configured file wins.",
     citationCountHint:
       "The current-document count shows both unique citation keys and total citation occurrences found in bracket citations.",
+    renderHint:
+      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the bundled American Meteorological Society style.",
     citationCountFormat: "{unique} unique / {total} total",
     filesTitle: "BibTeX Files",
   },
@@ -72,14 +80,22 @@ const zhCn = {
     indexedEntriesLabel: "已索引条目数",
     citedEntriesLabel: "当前文档引用统计",
     refreshButton: "刷新缓存",
+    renderButton: "渲染引用",
     empty: "暂未配置任何 BibTeX 文件。",
     unavailable: "待刷新",
     loadErrorPrefix: "刷新索引失败：",
     invalidCitationPrefix: "当前文档包含未收录于文献库的 citation key：",
+    renderErrorPrefix: "渲染引用失败：",
+    renderReloadUnavailable: "当前 Typora 运行时没有暴露文档重载接口。",
+    renderNoChanges:
+      "没有发现可渲染的严格合法 CSL 引用块。当前只处理 [@key] 或 [@a; @b] 这类形式。",
+    renderSuccess: "已渲染 {blocks} 个引用块，共 {keys} 个 key。",
     triggerHint: "在编辑器中输入 [@query] 即可从已配置文件中检索引用。",
     duplicateHint: "当 citation key 重复时，会优先采用更靠前配置的文件。",
     citationCountHint:
       "当前文档统计基于方括号引用中的 citation key，同时显示唯一文献数与总出现次数。",
+    renderHint:
+      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按内置 American Meteorological Society 样式生成的文中引用。",
     citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },

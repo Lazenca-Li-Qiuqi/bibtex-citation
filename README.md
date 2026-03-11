@@ -14,6 +14,7 @@
 - 支持按 `citation key`、标题、作者、期刊、年份等字段搜索
 - 在 Typora 的方括号引用语法中输入 `@query` 触发候选列表
 - 在左侧活动栏提供 BibTeX 面板按钮，可查看当前配置概览、当前文档引用统计并手动刷新缓存
+- 支持把当前文档中严格合法的 `[@key]` / `[@a; @b]` 引用块渲染为文中引用
 - 支持在插件设置中切换 `English` 与 `简体中文` 两种界面语言
 - 多个 BibTeX 路径支持逐条添加、编辑、删除
 - 相对路径支持多种解析基准模式
@@ -147,8 +148,25 @@ D:/Literature/shared.bib
 - 查看当前已索引条目数量
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
 - 手动执行 `Refresh Cache`
+- 手动执行 `Render Citations / 渲染引用`
 
 当你修改 `Path Base` 或 BibTeX 文件列表后，侧边栏中的 `Indexed Entries` 会先显示“待刷新”。此时如果你手动点击 `Refresh Cache`，或直接在文档里输入 `[@query` 触发建议检索，插件都会重新读取文献库并把已索引条目数恢复为真实值。
+
+`Render Citations / 渲染引用` 当前只会处理严格合法的 CSL 引用块，也就是整段内容必须完全匹配 `[@key]` 或 `[@key1; @key2]` 这一类形式。比如：
+
+```text
+[@smith2024example]
+[@smith2024example; @doe2023study]
+```
+
+会被渲染为当前内置 CSL 样式对应的文中引用文本，例如：
+
+```text
+(Smith 2024)
+(Smith 2024; Doe 2023)
+```
+
+而像 `[see @smith2024example]`、`[@smith2024example, p. 3]`、`[smith2024example]` 这类包含说明文字、locator，或本身不是严格 CSL 引用块的片段，当前不会自动改写。
 
 ## 相对路径解析规则
 
