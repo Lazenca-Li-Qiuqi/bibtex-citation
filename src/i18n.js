@@ -27,6 +27,7 @@ const en = {
     unavailable: "Refresh needed",
     loadErrorPrefix: "Index refresh failed: ",
     invalidCitationPrefix: "Current document contains an unknown citation key: ",
+    invalidCitationBlockPrefix: "Current document contains an invalid citation block: ",
     renderErrorPrefix: "Citation rendering failed: ",
     insertBibliographyErrorPrefix: "Bibliography insertion failed: ",
     renderReloadUnavailable: "The current Typora runtime does not expose a document reload API.",
@@ -44,9 +45,9 @@ const en = {
     citationCountHint:
       "The current-document count shows both unique citation keys and total citation occurrences found in bracket citations.",
     renderHint:
-      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the configured CSL file. If any closed citation block contains an unknown key, the action stops with an error.",
+      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the configured CSL file. If any closed citation block contains an unknown key or invalid CSL syntax, the action stops with an error.",
     insertBibliographyHint:
-      "Insert Bibliography appends or updates a managed bibliography block at the end of the document, based on strictly valid citation blocks that still contain @keys. If any closed citation block contains an unknown key, the action stops with an error.",
+      "Insert Bibliography appends or updates a managed bibliography block at the end of the document, based on strictly valid citation blocks that still contain @keys. If any closed citation block contains an unknown key or invalid CSL syntax, the action stops with an error.",
     citationCountFormat: "{unique} unique / {total} total",
     filesTitle: "BibTeX Files",
   },
@@ -106,6 +107,7 @@ const zhCn = {
     unavailable: "待刷新",
     loadErrorPrefix: "刷新索引失败：",
     invalidCitationPrefix: "当前文档包含未收录于文献库的 citation key：",
+    invalidCitationBlockPrefix: "当前文档包含非法的 citation block：",
     renderErrorPrefix: "渲染引用失败：",
     insertBibliographyErrorPrefix: "插入参考文献失败：",
     renderReloadUnavailable: "当前 Typora 运行时没有暴露文档重载接口。",
@@ -121,9 +123,9 @@ const zhCn = {
     citationCountHint:
       "当前文档统计基于方括号引用中的 citation key，同时显示唯一文献数与总出现次数。",
     renderHint:
-      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按当前配置的 CSL 文件生成的文中引用。若任意闭合引用块包含未知 key，本次操作会直接报错并停止。",
+      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按当前配置的 CSL 文件生成的文中引用。若任意闭合引用块包含未知 key，或闭合块本身不是严格合法的 CSL 语法，本次操作会直接报错并停止。",
     insertBibliographyHint:
-      "插入参考文献会在文档末尾追加或更新一个受控的参考文献块，依据的是当前文档中仍保留 @key 的严格合法 citation block。若任意闭合引用块包含未知 key，本次操作会直接报错并停止。",
+      "插入参考文献会在文档末尾追加或更新一个受控的参考文献块，依据的是当前文档中仍保留 @key 的严格合法 citation block。若任意闭合引用块包含未知 key，或闭合块本身不是严格合法的 CSL 语法，本次操作会直接报错并停止。",
     citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },

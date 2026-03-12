@@ -5,7 +5,7 @@
  */
 export function extractClosedBracketRanges(markdown) {
   const ranges = [];
-  const source = String(markdown);
+  const source = maskHtmlComments(String(markdown));
   const linePattern = /.*(?:\r?\n|$)/g;
   let match;
 
@@ -44,4 +44,16 @@ export function extractClosedBracketRanges(markdown) {
   }
 
   return ranges;
+}
+
+/**
+ * 功能：把 HTML 注释中的非换行字符替换为空格，避免扫描引用时误把注释内容当正文。
+ * 说明：保留原始长度与换行位置，确保后续范围索引仍可直接用于原文。
+ * 输入：完整 Markdown 文本。
+ * 输出：屏蔽注释后的等长文本。
+ */
+function maskHtmlComments(markdown) {
+  return String(markdown || "").replace(/<!--[\s\S]*?-->/g, (comment) =>
+    comment.replace(/[^\r\n]/g, " "),
+  );
 }

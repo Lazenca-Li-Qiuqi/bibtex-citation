@@ -72,3 +72,39 @@ export function collectUniqueCitationKeys(validCitationBlocks) {
 
   return keys;
 }
+
+/**
+ * 功能：检查当前 Markdown 中是否存在会阻止 CSL 操作继续执行的非法引用块。
+ * 说明：只要某个闭合方括号块中出现 `@`，就要求它必须满足严格的
+ * `[@key]` / `[@a; @b]` 语法，且所有 key 都存在于当前文献库。
+ * 输入：Markdown 文本、用于校验 key 是否存在的函数。
+ * 输出：若存在问题则返回首个问题描述，否则返回 null。
+ */
+export function findFirstInvalidCitationProblem(markdown, isKnownKey) {
+  const ranges = extractClosedBracketRanges(String(markdown || ""));
+
+  for (const range of ranges) {
+    if (!range.text.includes("@")) {
+      continue;
+    }
+
+    const keys = parseStrictCitationKeys(range.text);
+    if (!keys) {
+      return {
+        type: "invalid-block",
+        blockText: range.text,
+      };
+    }
+
+    const unknownKey = keys.find((key) => !isKnownKey(key));
+    if (unknownKey) {
+      return {
+        type: "unknown-key",
+        key: unknownKey,
+        blockText: range.text,
+      };
+    }
+  }
+
+  return null;
+}

@@ -185,7 +185,7 @@ D:/Literature/shared.bib
 
 而像 `[see @smith2024example]`、`[@smith2024example, p. 3]`、`[smith2024example]` 这类包含说明文字、locator，或本身不是严格 CSL 引用块的片段，当前不会自动改写。
 
-如果当前文档任意闭合引用块中包含未收录于文献库的 citation key，那么“渲染引用”和“插入参考文献”都会直接报错并停止，不再跳过非法块后继续处理其他内容。
+如果当前文档任意闭合引用块中包含未收录于文献库的 citation key，或者闭合块本身不是严格合法的 CSL 语法，那么“渲染引用”和“插入参考文献”都会直接报错并停止，不再跳过非法块后继续处理其他内容。
 
 `Insert Bibliography / 插入参考文献` 会从当前文档中仍保留 `@key` 的严格合法 citation block 提取 key，按当前配置的 `.csl` 样式在文档末尾追加或更新一个受控参考文献块。受控块使用 HTML 注释包裹，便于后续重复执行时直接更新，例如：
 
@@ -216,9 +216,9 @@ D:/Literature/shared.bib
 | 上标型数字引用 | 已支持 | 当前直接使用 CSL 的 `html` 输出；像 `nature.csl` 会生成 `<sup>...</sup>` |
 | 机构作者 | 已支持 | 会按 CSL 输出结果渲染，不强制拆成个人姓名 |
 | bibliography 顺序驱动的 citation-number | 已支持 | 数字编号最终跟随样式定义的 bibliography 规则，而不是插件自定义规则 |
-| 前缀说明，如 `[see @key]` | 暂不支持 | 这类块当前会保持原样，不做改写 |
-| locator，如 `[@key, p. 3]` | 暂不支持 | 页码、章节号等 locator 目前不会参与渲染 |
-| suffix / 更复杂 citation cluster 语法 | 暂不支持 | 当前仅支持严格的 `[@a; @b]` 形式 |
+| 前缀说明，如 `[see @key]` | 暂不支持 | 这类块当前会阻止相关 CSL 操作继续执行，而不是静默跳过 |
+| locator，如 `[@key, p. 3]` | 暂不支持 | 页码、章节号等 locator 当前会阻止相关 CSL 操作继续执行 |
+| suffix / 更复杂 citation cluster 语法 | 暂不支持 | 当前仅支持严格的 `[@a; @b]` 形式；其余语法会直接报错 |
 | 脚注 / 尾注 note-style citation | 暂不支持 | 当前实现是原地替换正文，不会自动创建脚注结构 |
 | 插入或更新 bibliography | 已支持 | 会在文档末尾写入一个受控参考文献块，前提是文档里仍保留合法 `@key` 引用块 |
 
@@ -226,7 +226,7 @@ D:/Literature/shared.bib
 
 - 当前渲染输出优先使用 CSL 的 `html` 结果，因此某些样式可能会写入 HTML 实体，例如 `&#38;`
 - 对大多数普通 author-date / numeric 样式，这不会影响 Typora 中的显示效果
-- 当前只处理严格闭合且 key 全部存在于文献库中的 citation block；如果文档中任意闭合引用块包含未知 key，相关 CSL 操作会直接报错并停止
+- 当前只接受严格合法且 key 全部存在于文献库中的 citation block；如果文档中任意闭合引用块包含未知 key，或闭合块本身不是严格合法的 CSL 语法，相关 CSL 操作会直接报错并停止
 
 ## 相对路径解析规则
 

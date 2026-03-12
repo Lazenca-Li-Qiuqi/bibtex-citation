@@ -9,6 +9,7 @@ import { BibCitationSettingTab } from "./settings/tab.js";
 import { BibCitationSidebarPanel } from "./sidebar/panel.js";
 import { BibCitationSuggest } from "./suggest/suggest.js";
 import { registerSuggestInteractions } from "./suggest/interactions.js";
+import { findFirstInvalidCitationProblem } from "./csl/citation-blocks.js";
 
 /**
  * 功能：作为插件主控类，组合设置页、BibTeX 存储与候选建议模块。
@@ -137,13 +138,26 @@ export default class BibCitationPlugin extends Plugin {
    * 输出：若发现非法 citation key，则抛出错误；否则无返回值。
    */
   ensureNoInvalidCitationKeysForCslAction() {
-    const citationState = this.getCurrentDocumentCitationState();
-    if (!citationState.error) {
+    const markdown = window.editor?.getMarkdown?.() || "";
+    const entries = this.getBibEntries();
+    const entryKeySet = new Set(entries.map((entry) => entry.key));
+    const invalidProblem = findFirstInvalidCitationProblem(
+      markdown,
+      (key) => entryKeySet.has(key),
+    );
+    if (!invalidProblem) {
       return;
     }
 
+    if (invalidProblem.type === "unknown-key") {
+      throw new Error(
+        this.i18n.t.sidebar.invalidCitationPrefix + invalidProblem.key,
+      );
+    }
+
     throw new Error(
-      this.i18n.t.sidebar.invalidCitationPrefix + citationState.error,
+      this.i18n.t.sidebar.invalidCitationBlockPrefix
+        + summarizeCitationBlock(invalidProblem.blockText),
     );
   }
 
@@ -249,4 +263,18 @@ export default class BibCitationPlugin extends Plugin {
     this._suggest = suggest;
     this.registerMarkdownSugguest(suggest);
   }
+}
+
+/**
+ * 功能：把非法引用块整理成适合错误提示的单行摘要。
+ * 输入：原始引用块文本。
+ * 输出：压缩空白后的摘要字符串，必要时会截断。
+ */
+function summarizeCitationBlock(blockText) {
+  const normalized = String(blockText || "").replace(/\s+/g, " ").trim();
+  if (normalized.length <= 80) {
+    return normalized;
+  }
+
+  return normalized.slice(0, 77) + "...";
 }
