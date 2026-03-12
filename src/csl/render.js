@@ -1,7 +1,9 @@
 import { toCslItem } from "./item.js";
 import { getPluginRequire } from "./runtime.js";
-import { extractClosedBracketRanges } from "../document/brackets.js";
-import { collectValidCitationBlocksFromRanges, parseStrictCitationKeys } from "./citation-blocks.js";
+import {
+  collectCitationSourcesFromMarkdown,
+  parseStrictCitationKeys,
+} from "./citation-blocks.js";
 import {
   CITATION_END_MARKER,
   CITATION_START_MARKER,
@@ -15,51 +17,47 @@ const { Cite } = pluginRequire("@citation-js/core");
 const CONTROLLED_CITATION_PATTERN = createControlledCitationPattern();
 
 /**
- * 功能：把当前文档中严格匹配 `[@key; @other]` 的合法引用块渲染为 CSL 文中引用。
+ * 功能：把当前文档中的严格 `[@key]` 与受控 citation 块统一渲染为最新的 CSL 文中引用。
  * 输入：Markdown 文本、BibTeX 条目数组、已注册的 CSL 模板名。
- * 输出：返回改写后的 Markdown 与渲染统计。
+ * 输出：返回改写后的 Markdown 与渲染或更新统计。
  */
 export function renderCitationMarkdown(markdown, entries, templateName) {
   const source = String(markdown || "");
-  const ranges = extractClosedBracketRanges(source);
-  if (!ranges.length) {
+  const entryMap = new Map(entries.map((entry) => [entry.key, entry]));
+  const citationSources = collectValidCitationSources(source, entryMap);
+  if (!citationSources.length) {
     return createRenderResult(source);
   }
 
-  const entryMap = new Map(entries.map((entry) => [entry.key, entry]));
-  const validCitationBlocks = collectValidCitationBlocks(ranges, entryMap);
-  const cite = createCitationFormatter(validCitationBlocks, entryMap);
-  const citationOrder = createCitationOrder(validCitationBlocks, cite, templateName);
+  const cite = createCitationFormatter(citationSources, entryMap);
+  const citationOrder = createCitationOrder(citationSources, cite, templateName);
   let cursor = 0;
   let changed = false;
   let renderedBlocks = 0;
   let renderedKeys = 0;
   let output = "";
 
-  for (const range of ranges) {
-    output += source.slice(cursor, range.start);
+  for (const citationSource of citationSources) {
+    output += source.slice(cursor, citationSource.range.start);
 
-    const citationBlock = validCitationBlocks.find((block) => block.range === range);
-    if (!citationBlock || !cite) {
-      output += range.text;
-      cursor = range.end;
-      continue;
-    }
-
-    output += buildControlledCitationBlock(
-      citationBlock.range.text,
+    const nextBlock = buildControlledCitationBlock(
+      citationSource.range.text,
       renderCitationCluster(
         cite,
-        citationBlock,
-        validCitationBlocks,
+        citationSource,
+        citationSources,
         citationOrder,
         templateName,
       ),
     );
-    changed = true;
+    const previousBlock = source.slice(citationSource.range.start, citationSource.range.end);
+    output += nextBlock;
+    if (nextBlock !== previousBlock) {
+      changed = true;
+    }
     renderedBlocks += 1;
-    renderedKeys += citationBlock.keys.length;
-    cursor = range.end;
+    renderedKeys += citationSource.keys.length;
+    cursor = citationSource.range.end;
   }
 
   output += source.slice(cursor);
@@ -116,27 +114,27 @@ function buildControlledCitationBlock(rawCitationBlock, renderedCitationHtml) {
 }
 
 /**
- * 功能：收集当前文档中可安全渲染的合法引用块。
- * 输入：闭合方括号范围列表、BibTeX 条目映射。
- * 输出：仅包含所有 key 都存在于文献库中的引用块描述数组。
+ * 功能：收集当前文档中可安全渲染或更新的引用源。
+ * 输入：Markdown 文本、BibTeX 条目映射。
+ * 输出：仅包含所有 key 都存在于文献库中的引用源数组。
  */
-function collectValidCitationBlocks(ranges, entryMap) {
-  return collectValidCitationBlocksFromRanges(ranges, (key) => entryMap.has(key));
+function collectValidCitationSources(markdown, entryMap) {
+  return collectCitationSourcesFromMarkdown(markdown, (key) => entryMap.has(key));
 }
 
 /**
  * 功能：基于整篇文档里所有合法引用块创建统一的 Citation.js 渲染器。
- * 输入：合法引用块列表、BibTeX 条目映射。
+ * 输入：合法引用源列表、BibTeX 条目映射。
  * 输出：可复用的 Cite 实例；若没有合法引用块则返回 null。
  */
-function createCitationFormatter(validCitationBlocks, entryMap) {
-  if (!validCitationBlocks.length) {
+function createCitationFormatter(citationSources, entryMap) {
+  if (!citationSources.length) {
     return null;
   }
 
   const citationItems = new Map();
-  for (const citationBlock of validCitationBlocks) {
-    for (const key of citationBlock.keys) {
+  for (const citationSource of citationSources) {
+    for (const key of citationSource.keys) {
       if (!citationItems.has(key)) {
         citationItems.set(key, toCslItem(entryMap.get(key)));
       }
@@ -148,11 +146,11 @@ function createCitationFormatter(validCitationBlocks, entryMap) {
 
 /**
  * 功能：根据当前样式的参考文献排序结果，为 citation key 建立稳定顺序。
- * 输入：合法引用块列表、Cite 实例、样式模板名。
+ * 输入：合法引用源列表、Cite 实例、样式模板名。
  * 输出：key 到排序序号的映射；若无法生成则返回空映射。
  */
-function createCitationOrder(validCitationBlocks, cite, templateName) {
-  if (!cite || !validCitationBlocks.length) {
+function createCitationOrder(citationSources, cite, templateName) {
+  if (!cite || !citationSources.length) {
     return new Map();
   }
 
@@ -169,28 +167,28 @@ function createCitationOrder(validCitationBlocks, cite, templateName) {
 
 /**
  * 功能：在整篇文档上下文中渲染单个引用块，保证同作者同年的消歧结果稳定。
- * 输入：Cite 实例、当前引用块、整篇文档的合法引用块列表、引用排序映射、样式模板名。
+ * 输入：Cite 实例、当前引用源、整篇文档的合法引用源列表、引用排序映射、样式模板名。
  * 输出：当前引用块对应的文中引用字符串。
  */
 function renderCitationCluster(
   cite,
-  citationBlock,
-  validCitationBlocks,
+  citationSource,
+  citationSources,
   citationOrder,
   templateName,
 ) {
-  const blockIndex = validCitationBlocks.indexOf(citationBlock);
-  const citationsPre = validCitationBlocks
+  const blockIndex = citationSources.indexOf(citationSource);
+  const citationsPre = citationSources
     .slice(0, blockIndex)
     .map((block) => sortCitationKeys(block.keys, citationOrder));
-  const citationsPost = validCitationBlocks
+  const citationsPost = citationSources
     .slice(blockIndex + 1)
     .map((block) => sortCitationKeys(block.keys, citationOrder));
 
   return cite.format("citation", {
     template: templateName,
     format: "html",
-    entry: sortCitationKeys(citationBlock.keys, citationOrder),
+    entry: sortCitationKeys(citationSource.keys, citationOrder),
     citationsPre,
     citationsPost,
   });

@@ -1,6 +1,6 @@
 {
   "name": "bibtex-citation",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Typora BibTeX Citation Plugin",
   "author": "Lazenca-Liqiuqi",
   "main": "main.js",

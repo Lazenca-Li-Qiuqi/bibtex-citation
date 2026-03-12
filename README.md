@@ -6,7 +6,7 @@
 
 本项目 fork 自 `adam-coates/typora-plugin-zotero`，并在此基础上逐步调整为面向本地 BibTeX 文件的引用工作流。
 
-当前文档对应发布版本：`0.2.9`。
+当前文档对应发布版本：`0.2.10`。
 
 ## 功能概览
 
@@ -28,7 +28,7 @@
 - Typora
 - Typora Community Plugin Framework
 - 一个或多个本地 `.bib` 文件
-- 如需使用 `Render Citations / 渲染引用`，还需要一个可读取的本地 `.csl` 文件
+- 如需使用 `Render / Update Citations / 渲染/更新引用`，还需要一个可读取的本地 `.csl` 文件
 
 ## 安装
 
@@ -157,14 +157,14 @@ D:/Literature/shared.bib
 - 查看当前已索引条目数量
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
 - 手动执行 `Refresh Cache`
-- 手动执行 `Render Citations / 渲染引用`
+- 手动执行 `Render / Update Citations / 渲染/更新引用`
 - 手动执行 `Restore Citations / 恢复引用`
 - 手动执行 `Insert / Update Bibliography / 插入/更新参考文献`
 - 手动执行 `Remove Bibliography / 删除参考文献`
 
 当你修改 `Path Base` 或 BibTeX 文件列表后，侧边栏中的 `Indexed Entries` 会先显示“待刷新”。此时如果你手动点击 `Refresh Cache`，或直接在文档里输入 `[@query` 触发建议检索，插件都会重新读取文献库并把已索引条目数恢复为真实值。
 
-`Render Citations / 渲染引用` 当前只会处理严格合法的 CSL 引用块，也就是整段内容必须完全匹配 `[@key]` 或 `[@key1; @key2]` 这一类形式；同时需要你先在设置里配置一个可读取的 `.csl` 文件。比如：
+`Render / Update Citations / 渲染/更新引用` 当前会处理两类引用源：正文里严格合法的 CSL 引用块，以及已经由本插件生成的受控 citation 块。可见引用块仍然要求整段内容完全匹配 `[@key]` 或 `[@key1; @key2]` 这一类形式；同时需要你先在设置里配置一个可读取的 `.csl` 文件。比如：
 
 ```text
 [@smith2024example]
@@ -192,12 +192,12 @@ D:/Literature/shared.bib
 
 而像 `[see @smith2024example]`、`[@smith2024example, p. 3]`、`[smith2024example]` 这类包含说明文字、locator，或本身不是严格 CSL 引用块的片段，当前不会自动改写。
 
-如果当前文档任意正文闭合引用块中包含未收录于文献库的 citation key，或者闭合块本身不是严格合法的 CSL 语法，那么“渲染引用”和“插入/更新参考文献”都会直接报错并停止，不再跳过非法块后继续处理其他内容。
+如果当前文档任意正文闭合引用块中包含未收录于文献库的 citation key，或者闭合块本身不是严格合法的 CSL 语法，那么“渲染/更新引用”和“插入/更新参考文献”都会直接报错并停止，不再跳过非法块后继续处理其他内容。
 
 `Insert / Update Bibliography / 插入/更新参考文献` 会从当前文档中两类引用源提取 key：
 
 - 正文里直接可见的严格 `[@key]` / `[@a; @b]`
-- 由 `Render Citations` 生成的受控 citation 块中保存的原始 `[@key]`
+- 由 `Render / Update Citations` 生成的受控 citation 块中保存的原始 `[@key]`
 
 然后按当前配置的 `.csl` 样式在文档末尾追加或更新一个受控参考文献块。受控块使用 HTML 注释包裹，便于后续重复执行时直接更新，例如：
 
@@ -213,6 +213,7 @@ D:/Literature/shared.bib
 
 - bibliography 现在会同时读取正文里的严格 `[@key]` 和受控 citation 块中的原始 `[@key]`
 - 因此在当前版本中，先渲染引用再插入/更新参考文献也是可行的
+- 如果你更换了 `CSL File`，现在也可以直接再次执行“渲染/更新引用”，不需要先恢复成原始 `[@key]`
 
 `Remove Bibliography / 删除参考文献` 只会删除这类由本插件生成的受控参考文献块，不会删除你手写的普通 `## References` 段落。
 
@@ -220,7 +221,7 @@ D:/Literature/shared.bib
 
 ## 当前支持的 CSL 特性
 
-下表描述的是当前插件在“`Render Citations / 渲染引用`”这条链路上，对 CSL 文内引用相关能力的支持范围。
+下表描述的是当前插件在“`Render / Update Citations / 渲染/更新引用`”这条链路上，对 CSL 文内引用相关能力的支持范围。
 
 | 特性 | 当前状态 | 说明 |
 | --- | --- | --- |
@@ -312,6 +313,6 @@ secondary.bib
 
 - 插件 ID：`bibtex-citation`
 - 插件名称：`BibTeX Citations`
-- 当前版本：`0.2.9`
+- 当前版本：`0.2.10`
 - 支持平台：Windows、Linux、macOS
 - 本仓库和本地插件目录都应使用名称 `bibtex-citation`

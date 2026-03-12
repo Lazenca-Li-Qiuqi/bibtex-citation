@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.10 - 2026-03-12
+
+- 让 `Render / Update Citations / 渲染/更新引用` 同时处理正文里的严格 `[@key]` 与已有受控 citation 块，切换 `CSL File` 后可以直接原位重渲染，不需要先恢复
+- 保持 citation 渲染的整篇文档级上下文与稳定消歧逻辑不变，并在重复执行同一样式时避免无意义改写
+- 更新中英文侧边栏文案、README、AGENTS 与 LAST_RUN，使按钮语义和当前“可直接更新已渲染 citation”的行为保持一致
+
 ## 0.2.9 - 2026-03-12
 
 - 为 citation 渲染增加受控 citation 块与 `Restore Citations / 恢复`，渲染后保留原始 `[@key]`，可在需要时恢复回原始引用语法

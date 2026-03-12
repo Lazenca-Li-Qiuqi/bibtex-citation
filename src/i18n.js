@@ -20,7 +20,7 @@ const en = {
     indexedEntriesLabel: "Indexed Entries",
     citedEntriesLabel: "Cited In Current Doc",
     refreshButton: "Refresh Cache",
-    renderButton: "Render Citations",
+    renderButton: "Render / Update Citations",
     restoreButton: "Restore",
     insertBibliographyButton: "Insert / Update Bibliography",
     removeBibliographyButton: "Remove",
@@ -35,8 +35,8 @@ const en = {
     removeBibliographyErrorPrefix: "Bibliography removal failed: ",
     renderReloadUnavailable: "The current Typora runtime does not expose a document reload API.",
     renderNoChanges:
-      "No strictly valid CSL citation blocks were found. This action currently only processes patterns like [@key] or [@a; @b].",
-    renderSuccess: "Rendered {blocks} citation blocks ({keys} keys).",
+      "No usable citation sources were found. This action currently processes both visible strict [@key] blocks and managed citation blocks.",
+    renderSuccess: "Rendered or updated {blocks} citation blocks ({keys} keys).",
     restoreNoChanges: "No managed citation blocks were found.",
     restoreSuccess: "Restored {blocks} citation blocks ({keys} keys).",
     insertBibliographyNoChanges:
@@ -49,7 +49,7 @@ const en = {
       "Type [@query] to search the configured BibTeX files. For duplicate keys, the earlier file wins.",
     citationCountHint: "Counts show unique keys and total bracket citations.",
     renderHint:
-      "Render only processes strict blocks like [@key] or [@a; @b] and writes managed citation blocks. Restore turns those managed blocks back into raw [@key]. Insert / Update Bibliography reads both visible [@key] blocks and managed citation blocks. Remove Bibliography only deletes the managed block created by this plugin. Unknown keys or invalid syntax stop render and bibliography updates.",
+      "Render / Update Citations processes both visible strict blocks like [@key] or [@a; @b] and existing managed citation blocks, then rewrites them as managed citation blocks using the current CSL style. Restore turns those managed blocks back into raw [@key]. Insert / Update Bibliography reads both visible [@key] blocks and managed citation blocks. Remove Bibliography only deletes the managed block created by this plugin. Unknown keys or invalid syntax stop citation and bibliography updates.",
     citationCountFormat: "{unique} unique / {total} total",
     filesTitle: "BibTeX Files",
   },
@@ -103,7 +103,7 @@ const zhCn = {
     indexedEntriesLabel: "已索引条目数",
     citedEntriesLabel: "当前文档引用统计",
     refreshButton: "刷新缓存",
-    renderButton: "渲染引用",
+    renderButton: "渲染/更新引用",
     restoreButton: "恢复",
     insertBibliographyButton: "插入/更新参考文献",
     removeBibliographyButton: "删除",
@@ -118,8 +118,8 @@ const zhCn = {
     removeBibliographyErrorPrefix: "删除参考文献失败：",
     renderReloadUnavailable: "当前 Typora 运行时没有暴露文档重载接口。",
     renderNoChanges:
-      "没有发现可渲染的严格合法 CSL 引用块。当前只处理 [@key] 或 [@a; @b] 这类形式。",
-    renderSuccess: "已渲染 {blocks} 个引用块，共 {keys} 个 key。",
+      "没有发现可用于渲染或更新的引用源。当前会同时处理正文里可见的严格 [@key] 和受控 citation 块。",
+    renderSuccess: "已渲染或更新 {blocks} 个引用块，共 {keys} 个 key。",
     restoreNoChanges: "当前没有可恢复的受控 citation 块。",
     restoreSuccess: "已恢复 {blocks} 个引用块，共 {keys} 个 key。",
     insertBibliographyNoChanges:
@@ -131,7 +131,7 @@ const zhCn = {
     triggerHint: "输入 [@query] 即可检索已配置的 BibTeX 文件；若 key 重复，优先采用更靠前的文件。",
     citationCountHint: "统计显示唯一 key 数和总引用次数。",
     renderHint:
-      "渲染引用只处理严格形式，如 [@key] 或 [@a; @b]，并写入受控 citation 块。恢复会把这些受控块还原成原始 [@key]。插入/更新参考文献会同时读取正文里可见的 [@key] 和受控 citation 块。删除参考文献只会删除本插件生成的受控块。遇到未知 key 或非法语法时，渲染引用和插入/更新参考文献都会直接停止。",
+      "渲染/更新引用会同时处理严格形式的可见 [@key] / [@a; @b] 和已有受控 citation 块，并按当前 CSL 样式统一改写成最新的受控 citation 块。恢复会把这些受控块还原成原始 [@key]。插入/更新参考文献会同时读取正文里可见的 [@key] 和受控 citation 块。删除参考文献只会删除本插件生成的受控块。遇到未知 key 或非法语法时，引用更新和插入/更新参考文献都会直接停止。",
     citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },
