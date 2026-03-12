@@ -74,7 +74,16 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       ]),
       createActions([
         { label: t.refreshButton, onClick: () => this.handleRefresh() },
-        { label: t.renderButton, onClick: () => this.handleRenderCitations() },
+        {
+          label: t.renderButton,
+          onClick: () => this.handleRenderCitations(),
+          className: "bibtex-sidebar-button-wide",
+        },
+        {
+          label: t.restoreButton,
+          onClick: () => this.handleRestoreCitations(),
+          className: "bibtex-sidebar-button-narrow",
+        },
         {
           label: t.insertBibliographyButton,
           onClick: () => this.handleUpsertBibliography(),
@@ -128,6 +137,29 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       );
     } catch (error) {
       new Notice(this.plugin.i18n.t.sidebar.renderErrorPrefix + (error?.message || String(error)));
+    }
+  }
+
+  /**
+   * 功能：把当前文档中的受控 citation 块恢复为原始 `[@key]` 文本。
+   * 输入：无。
+   * 输出：无返回值。
+   */
+  async handleRestoreCitations() {
+    try {
+      const result = await this.plugin.restoreCurrentDocumentCitations();
+      if (!result.changed) {
+        new Notice(this.plugin.i18n.t.sidebar.restoreNoChanges);
+        return;
+      }
+
+      new Notice(
+        this.plugin.i18n.t.sidebar.restoreSuccess
+          .replace("{blocks}", String(result.renderedBlocks))
+          .replace("{keys}", String(result.renderedKeys)),
+      );
+    } catch (error) {
+      new Notice(this.plugin.i18n.t.sidebar.restoreErrorPrefix + (error?.message || String(error)));
     }
   }
 

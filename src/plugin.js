@@ -98,6 +98,30 @@ export default class BibCitationPlugin extends Plugin {
   }
 
   /**
+   * 功能：把当前文档中的受控 citation 块恢复为原始 `[@key]` 文本。
+   * 输入：无。
+   * 输出：返回本次恢复结果与统计。
+   */
+  async restoreCurrentDocumentCitations() {
+    const markdown = window.editor?.getMarkdown?.() || "";
+    const { restoreCitationMarkdown } = await import("./csl/render.js");
+    const result = restoreCitationMarkdown(markdown);
+    if (!result.changed) {
+      return result;
+    }
+
+    const reloadContent = window.File?.reloadContent;
+    if (typeof reloadContent !== "function") {
+      throw new Error(this.i18n.t.sidebar.renderReloadUnavailable);
+    }
+
+    reloadContent(result.markdown, false, true, false, true);
+    this.resetDocumentState();
+    this.sidebarPanel?.render?.();
+    return result;
+  }
+
+  /**
    * 功能：根据当前文档中的合法 citation key 生成或更新参考文献块。
    * 输入：无。
    * 输出：返回本次插入结果与引用 key 统计。

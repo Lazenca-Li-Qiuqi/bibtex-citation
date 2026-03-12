@@ -158,6 +158,7 @@ D:/Literature/shared.bib
 - 查看当前文档中的引用统计（中文界面显示为“共 x 条 / y 次”）
 - 手动执行 `Refresh Cache`
 - 手动执行 `Render Citations / 渲染引用`
+- 手动执行 `Restore Citations / 恢复引用`
 - 手动执行 `Insert / Update Bibliography / 插入/更新参考文献`
 - 手动执行 `Remove Bibliography / 删除参考文献`
 
@@ -177,7 +178,11 @@ D:/Literature/shared.bib
 (Smith 2024; Doe 2023)
 ```
 
-这一步属于“替换式渲染”：执行后，原始的 `[@key]` 会被直接替换成渲染后的文中引用文本。
+这一步当前属于“受控渲染”：执行后，原始的 `[@key]` 不再直接显示在正文里，但会被保存在受控注释中，正文显示的是渲染后的文中引用文本，例如：
+
+```html
+<!-- bibtex-citation:citation:start [@smith2024example] -->(Smith 2024)<!-- bibtex-citation:citation:end -->
+```
 
 若当前样式本身要求上标数字引用，例如 `nature` 一类样式，渲染结果也可能直接写成 HTML 上标，例如：
 
@@ -201,10 +206,12 @@ D:/Literature/shared.bib
 
 注意：
 
-- 这一步依赖文档里还保留原始 `[@key]`；如果你已经先执行过 `Render Citations` 把 `@key` 替换成正文引用文本，那么当前版本将无法再从文档中反推出参考文献 key
+- 当前版本的 bibliography 仍只会读取文档里直接可见的严格 `[@key]` 引用块；虽然 `Render Citations` 已经把原始 key 保存在受控注释中，但 bibliography 还没有接入这条提取链路
 - 因此在当前版本中，更推荐先插入参考文献，再决定是否执行“渲染引用”
 
 `Remove Bibliography / 删除参考文献` 只会删除这类由本插件生成的受控参考文献块，不会删除你手写的普通 `## References` 段落。
+
+`Restore Citations / 恢复引用` 会把这类受控 citation 块重新还原成原始的 `[@key]` 或 `[@a; @b]`。
 
 ## 当前支持的 CSL 特性
 
