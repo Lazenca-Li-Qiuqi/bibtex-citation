@@ -60,7 +60,6 @@ export class BibCitationSidebarPanel extends SidebarPanel {
     }
 
     const sections = [
-      createHeading(t.heading, t.description),
       createSummaryGrid([
         [t.pathBaseLabel, getPathBaseLabel(pathBase, this.plugin.i18n.t.settings.pathBase)],
         [t.cslFileLabel, cslFile || t.unavailable],
@@ -82,10 +81,8 @@ export class BibCitationSidebarPanel extends SidebarPanel {
       citationState.error ? createError(t.invalidCitationPrefix + citationState.error) : null,
       paths.length ? createPathList(paths, t.filesTitle) : createEmpty(t.empty),
       createFootnote(t.triggerHint),
-      createFootnote(t.duplicateHint),
       createFootnote(t.citationCountHint),
       createFootnote(t.renderHint),
-      createFootnote(t.insertBibliographyHint),
     ].filter(Boolean);
 
     this.containerEl.innerHTML = "";
@@ -157,22 +154,6 @@ function createRibbonIcon() {
   icon.setAttribute("aria-hidden", "true");
   icon.textContent = "“";
   return icon;
-}
-
-function createHeading(title, description) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "bibtex-sidebar-section";
-
-  const heading = document.createElement("h3");
-  heading.className = "bibtex-sidebar-title";
-  heading.textContent = title;
-
-  const desc = document.createElement("p");
-  desc.className = "bibtex-sidebar-description";
-  desc.textContent = description;
-
-  wrapper.append(heading, desc);
-  return wrapper;
 }
 
 function createSummaryGrid(items) {

@@ -13,8 +13,7 @@ const en = {
   sidebar: {
     title: "BibTeX Citations",
     heading: "BibTeX Citations",
-    description:
-      "Review the current BibTeX configuration, indexed entries, and quick actions.",
+    description: "Check the current library status and quick actions.",
     pathBaseLabel: "Path Base",
     cslFileLabel: "CSL File",
     configuredFilesLabel: "Configured Files",
@@ -39,15 +38,10 @@ const en = {
     insertBibliographySuccess: "Inserted bibliography for {keys} cited keys.",
     bibliographyHeading: "References",
     triggerHint:
-      "Type [@query] in the editor to search citations from the configured files.",
-    duplicateHint:
-      "When citation keys are duplicated, the earlier configured file wins.",
-    citationCountHint:
-      "The current-document count shows both unique citation keys and total citation occurrences found in bracket citations.",
+      "Type [@query] to search the configured BibTeX files. For duplicate keys, the earlier file wins.",
+    citationCountHint: "Counts show unique keys and total bracket citations.",
     renderHint:
-      "Render Citations replaces strictly valid CSL citation blocks such as [@key] or [@a; @b] with in-text citations using the configured CSL file. If any closed citation block contains an unknown key or invalid CSL syntax, the action stops with an error.",
-    insertBibliographyHint:
-      "Insert Bibliography appends or updates a managed bibliography block at the end of the document, based on strictly valid citation blocks that still contain @keys. If any closed citation block contains an unknown key or invalid CSL syntax, the action stops with an error.",
+      "Render only processes strict blocks like [@key] or [@a; @b]. Insert Bibliography only uses strict @key blocks still present in the document. Unknown keys or invalid syntax stop both actions.",
     citationCountFormat: "{unique} unique / {total} total",
     filesTitle: "BibTeX Files",
   },
@@ -94,7 +88,7 @@ const zhCn = {
   sidebar: {
     title: "BibTeX 引用",
     heading: "BibTeX 引用",
-    description: "查看当前 BibTeX 配置、索引状态与快捷操作。",
+    description: "查看当前文献库状态与快捷操作。",
     pathBaseLabel: "路径基准",
     cslFileLabel: "CSL 文件",
     configuredFilesLabel: "已配置文件数",
@@ -118,14 +112,10 @@ const zhCn = {
       "没有发现可用于生成参考文献的严格合法 citation key。当前只有在文档里还保留 [@key] 或 [@a; @b] 这类形式时，才能插入参考文献。",
     insertBibliographySuccess: "已为 {keys} 个引用 key 插入参考文献。",
     bibliographyHeading: "参考文献",
-    triggerHint: "在编辑器中输入 [@query] 即可从已配置文件中检索引用。",
-    duplicateHint: "当 citation key 重复时，会优先采用更靠前配置的文件。",
-    citationCountHint:
-      "当前文档统计基于方括号引用中的 citation key，同时显示唯一文献数与总出现次数。",
+    triggerHint: "输入 [@query] 即可检索已配置的 BibTeX 文件；若 key 重复，优先采用更靠前的文件。",
+    citationCountHint: "统计显示唯一 key 数和总引用次数。",
     renderHint:
-      "渲染引用会把严格合法的 CSL 引用块，例如 [@key] 或 [@a; @b]，替换成按当前配置的 CSL 文件生成的文中引用。若任意闭合引用块包含未知 key，或闭合块本身不是严格合法的 CSL 语法，本次操作会直接报错并停止。",
-    insertBibliographyHint:
-      "插入参考文献会在文档末尾追加或更新一个受控的参考文献块，依据的是当前文档中仍保留 @key 的严格合法 citation block。若任意闭合引用块包含未知 key，或闭合块本身不是严格合法的 CSL 语法，本次操作会直接报错并停止。",
+      "渲染引用只处理严格形式，如 [@key] 或 [@a; @b]。插入参考文献只使用文档里仍保留的严格 @key 引用块。遇到未知 key 或非法语法时，这两个操作都会直接停止。",
     citationCountFormat: "共 {unique} 条 / {total} 次",
     filesTitle: "BibTeX 文件",
   },
