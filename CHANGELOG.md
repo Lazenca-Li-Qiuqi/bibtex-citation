@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.9 - 2026-03-12
+
+- 为 citation 渲染增加受控 citation 块与 `Restore Citations / 恢复`，渲染后保留原始 `[@key]`，可在需要时恢复回原始引用语法
+- 抽出统一引用源提取器，同时识别正文里的严格 `[@key]` 与受控 citation 块中的原始 `[@key]`，并让 bibliography、当前文档引用统计与相关校验复用同一套来源模型
+- 调整 bibliography 工作流：渲染后的 citation 不再阻断参考文献生成，当前可以直接根据受控 citation 块插入、更新或删除文末受控参考文献块
+
 ## 0.2.8 - 2026-03-12
 
 - 收紧 CSL 文档改写前的全文校验：遇到未知 citation key 或非法 citation block 时直接报错并停止，不再继续渲染或更新参考文献

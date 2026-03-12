@@ -5,7 +5,7 @@
 - 项目名称：`bibtex-citation`
 - 当前工作区目录名与 Git 远程仓库名均已迁移为 `bibtex-citation`
 - 项目类型：Typora Community Plugin 插件
-- 当前最新已发布版本：`0.2.8`
+- 当前最新已发布版本：`0.2.9`
 - 主要功能：在 Typora 的方括号引用语法中输入 `@query` 时，从配置的多个 BibTeX 文件中检索文献条目并插入引用键
 - 运行依赖：
   - Typora Community Plugin Framework
